@@ -1,0 +1,14 @@
+node_modules
+.git
+.terraform
+*.tfstate
+*.tfstate.backup
+*.tfvars
+packages/extension
+infra
+docs
+.claude
+.env
+.env.local
+*.log
+*.vsix

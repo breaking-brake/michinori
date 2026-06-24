@@ -1,0 +1,17 @@
+import { z } from "zod";
+
+const EnvSchema = z.object({
+  PORT: z.coerce.number().default(8080),
+  NODE_ENV: z.enum(["development", "production"]).default("development"),
+});
+
+function loadEnv() {
+  const result = EnvSchema.safeParse(process.env);
+  if (!result.success) {
+    console.error("Invalid environment variables:", result.error.flatten().fieldErrors);
+    process.exit(1);
+  }
+  return result.data;
+}
+
+export const env = loadEnv();

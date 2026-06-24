@@ -1,0 +1,7 @@
+packages:
+  - "packages/*"
+  - "packages/extension/webview"
+allowBuilds:
+  "@google/genai": true
+  esbuild: true
+  protobufjs: true

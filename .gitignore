@@ -1,0 +1,16 @@
+node_modules/
+dist/
+out/
+*.vsix
+
+.env
+.env.local
+
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!*.tfvars.example
+
+.DS_Store
+*.log

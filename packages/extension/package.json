@@ -1,0 +1,61 @@
+{
+  "name": "michinori",
+  "displayName": "Michinori",
+  "description": "コードベースの現実から、タスクの全体像・依存関係・完了見込みを一気に可視化",
+  "version": "0.0.1",
+  "publisher": "se-nishikawa",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "workspaceContains:**/.michinori.json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "michinori.generate",
+        "title": "Michinori: DAGを生成"
+      },
+      {
+        "command": "michinori.modify",
+        "title": "Michinori: DAGを修正"
+      },
+      {
+        "command": "michinori.setApiKey",
+        "title": "Michinori: APIキーを設定"
+      },
+      {
+        "command": "michinori.openDag",
+        "title": "Michinori: DAGを開く"
+      }
+    ],
+    "configuration": {
+      "title": "Michinori",
+      "properties": {
+        "michinori.apiEndpoint": {
+          "type": "string",
+          "default": "http://localhost:8080",
+          "description": "Cloud Run API endpoint URL"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "typecheck": "tsc --noEmit",
+    "build:webview": "pnpm --filter michinori-webview build",
+    "package": "pnpm run build:webview && pnpm run compile && vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "@michinori/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.96.0",
+    "typescript": "^5.7.0"
+  }
+}

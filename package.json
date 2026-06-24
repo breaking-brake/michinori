@@ -1,0 +1,10 @@
+{
+  "name": "michinori",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.1.2",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "typecheck": "pnpm -r run typecheck"
+  }
+}

@@ -14,6 +14,8 @@ import "@xyflow/react/dist/style.css";
 import { DagNode } from "./components/DagNode";
 import { Header } from "./components/Header";
 import { InputPanel } from "./components/InputPanel";
+import { ModifyPanel } from "./components/ModifyPanel";
+import { LoadingOverlay } from "./components/LoadingOverlay";
 import { useVSCodeApi } from "./hooks/useVSCodeApi";
 
 const nodeTypes = { dag: DagNode };
@@ -186,6 +188,13 @@ export default function App() {
     [vscode],
   );
 
+  const handleModify = useCallback(
+    (prompt: string) => {
+      vscode?.postMessage({ type: "modify", prompt });
+    },
+    [vscode],
+  );
+
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       const statusCycle = ["未着手", "進行中", "PR Open", "完了"];
@@ -206,7 +215,7 @@ export default function App() {
         </div>
       )}
       {showInput && <InputPanel onSubmit={handleGenerate} loading={loading} />}
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, position: "relative" }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -220,6 +229,8 @@ export default function App() {
           <Background />
           <Controls />
         </ReactFlow>
+        {!showInput && <ModifyPanel onSubmit={handleModify} loading={loading} />}
+        {loading && <LoadingOverlay />}
       </div>
     </div>
   );

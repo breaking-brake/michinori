@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build:webview",
+      "type": "shell",
+      "command": "pnpm --filter michinori-webview build",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "build:extension",
+      "type": "shell",
+      "command": "pnpm --filter michinori compile",
+      "group": "build",
+      "dependsOn": "build:webview",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "watch:extension",
+      "type": "shell",
+      "command": "pnpm --filter michinori watch",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"]
+    },
+    {
+      "label": "dev:server",
+      "type": "shell",
+      "command": "pnpm --filter @michinori/server dev",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

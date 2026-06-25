@@ -41,5 +41,7 @@ export function useDagMessages() {
     }
   }, []);
 
-  return { state, dispatch };
+  const reset = useCallback(() => setState(INITIAL_STATE), []);
+
+  return { state, dispatch, reset };
 }

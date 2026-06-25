@@ -174,6 +174,7 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
       <Header
         completionDate={derived?.estimatedCompletionDate ?? null}
         remainingHours={derived?.remainingHours ?? 0}
+        onReset={() => adapter.reset()}
       />
       {error && (
         <div style={{ padding: "8px 16px", background: "#7f1d1d", color: "#fca5a5", fontSize: 13 }}>

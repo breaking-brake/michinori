@@ -110,5 +110,9 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
         dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
       }
     },
+    reset: () => {
+      localStorage.removeItem(DAG_STORAGE);
+      dispatch({ type: "dagUpdate", nodes: [], derived: { criticalPath: [], estimatedCompletionDate: "", totalEstimateHours: 0, remainingHours: 0 } });
+    },
   };
 }

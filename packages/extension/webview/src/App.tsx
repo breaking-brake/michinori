@@ -47,6 +47,8 @@ export default function App() {
         vscode?.postMessage({ type: "positionChange", nodeId, x, y }),
       onReady: () =>
         vscode?.postMessage({ type: "ready" }),
+      reset: () =>
+        vscode?.postMessage({ type: "reset" }),
     }),
     [vscode],
   );
@@ -60,7 +62,7 @@ export default function App() {
       loading={state.loading}
       error={state.error}
       hasDag={state.hasDag}
-      defaultPrompt="このリポジトリの開発タスクを整理して"
+      defaultPrompt="QwenCodeを対応プラットフォームとして追加したい"
     />
   );
 }

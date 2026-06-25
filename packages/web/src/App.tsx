@@ -16,7 +16,7 @@ export default function App() {
       error={state.error}
       hasDag={state.hasDag}
       defaultRepoUrl={import.meta.env.DEV ? "https://github.com/breaking-brake/cc-wf-studio" : undefined}
-      defaultPrompt="このリポジトリの開発タスクを整理して"
+      defaultPrompt="QwenCodeを対応プラットフォームとして追加したい"
     />
   );
 }

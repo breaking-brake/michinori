@@ -6,6 +6,7 @@ export interface DagAdapter {
   changeStatus(nodeId: string, status: string): void;
   changePosition(nodeId: string, x: number, y: number): void;
   onReady(): void;
+  reset(): void;
 }
 
 export interface DagUpdate {

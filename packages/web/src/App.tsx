@@ -15,7 +15,7 @@ export default function App() {
       loading={state.loading}
       error={state.error}
       hasDag={state.hasDag}
-      defaultRepoUrl={import.meta.env.DEV ? "https://github.com/se-nishikawa/michinori" : undefined}
+      defaultRepoUrl={import.meta.env.DEV ? "https://github.com/breaking-brake/cc-wf-studio" : undefined}
       defaultPrompt="このリポジトリの開発タスクを整理して"
     />
   );

@@ -60,6 +60,7 @@ export default function App() {
       loading={state.loading}
       error={state.error}
       hasDag={state.hasDag}
+      defaultPrompt="このリポジトリの開発タスクを整理して"
     />
   );
 }

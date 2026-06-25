@@ -15,6 +15,8 @@ export default function App() {
       loading={state.loading}
       error={state.error}
       hasDag={state.hasDag}
+      defaultRepoUrl={import.meta.env.DEV ? "https://github.com/se-nishikawa/michinori" : undefined}
+      defaultPrompt="このリポジトリの開発タスクを整理して"
     />
   );
 }

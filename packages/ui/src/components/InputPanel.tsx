@@ -12,11 +12,13 @@ const inputStyle = {
 interface InputPanelProps {
   onSubmit: (repoUrl: string, prompt: string) => void;
   loading: boolean;
+  defaultRepoUrl?: string;
+  defaultPrompt?: string;
 }
 
-export function InputPanel({ onSubmit, loading }: InputPanelProps) {
-  const [repoUrl, setRepoUrl] = useState("");
-  const [prompt, setPrompt] = useState("");
+export function InputPanel({ onSubmit, loading, defaultRepoUrl = "", defaultPrompt = "" }: InputPanelProps) {
+  const [repoUrl, setRepoUrl] = useState(defaultRepoUrl);
+  const [prompt, setPrompt] = useState(defaultPrompt);
 
   const canSubmit = repoUrl && prompt && !loading;
 

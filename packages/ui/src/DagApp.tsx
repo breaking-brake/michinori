@@ -29,6 +29,8 @@ interface DagAppProps {
   loading: boolean;
   error: string | null;
   hasDag: boolean;
+  defaultRepoUrl?: string;
+  defaultPrompt?: string;
 }
 
 function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }> {
@@ -84,7 +86,7 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag }: DagAppProps) {
+export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
 
@@ -178,7 +180,14 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
           {error}
         </div>
       )}
-      {!hasDag && <InputPanel onSubmit={handleGenerate} loading={loading} />}
+      {!hasDag && (
+        <InputPanel
+          onSubmit={handleGenerate}
+          loading={loading}
+          defaultRepoUrl={defaultRepoUrl}
+          defaultPrompt={defaultPrompt}
+        />
+      )}
       <div style={{ flex: 1, position: "relative" }}>
         <ReactFlow
           nodes={flowNodes}

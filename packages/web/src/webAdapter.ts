@@ -1,18 +1,9 @@
 import type { DagAdapter, DagMessage } from "@michinori/ui";
-import type { AnalyzeRequestType, DagNodeType, MichinoriFileType } from "@michinori/shared";
+import type { DagNodeType, MichinoriFileType } from "@michinori/shared";
 import { computeCriticalPath } from "@michinori/shared";
 
-const API_KEY_STORAGE = "michinori:apiKey";
 const DAG_STORAGE = "michinori:dag";
 const ENDPOINT_STORAGE = "michinori:endpoint";
-
-function getApiKey(): string | null {
-  return localStorage.getItem(API_KEY_STORAGE);
-}
-
-function setApiKey(key: string) {
-  localStorage.setItem(API_KEY_STORAGE, key);
-}
 
 function getEndpoint(): string {
   return localStorage.getItem(ENDPOINT_STORAGE) ?? "http://localhost:8080";
@@ -32,17 +23,19 @@ function saveDag(dag: MichinoriFileType) {
   localStorage.setItem(DAG_STORAGE, JSON.stringify(dag));
 }
 
-export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapter {
+export function createWebAdapter(
+  dispatch: (msg: DagMessage) => void,
+  getApiKey: () => string,
+): DagAdapter {
   async function callAnalyze(
     repoUrl: string,
     prompt: string,
     currentDag: MichinoriFileType | null,
   ) {
-    let apiKey = getApiKey();
+    const apiKey = getApiKey();
     if (!apiKey) {
-      apiKey = window.prompt("Gemini APIキーを入力してください（Google AI Studio）");
-      if (!apiKey) return;
-      setApiKey(apiKey);
+      dispatch({ type: "error", message: "APIキーを入力してください" });
+      return;
     }
 
     const endpoint = getEndpoint();

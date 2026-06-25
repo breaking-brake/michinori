@@ -23,21 +23,12 @@ function saveDag(dag: MichinoriFileType) {
   localStorage.setItem(DAG_STORAGE, JSON.stringify(dag));
 }
 
-export function createWebAdapter(
-  dispatch: (msg: DagMessage) => void,
-  getApiKey: () => string,
-): DagAdapter {
+export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapter {
   async function callAnalyze(
     repoUrl: string,
     prompt: string,
     currentDag: MichinoriFileType | null,
   ) {
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      dispatch({ type: "error", message: "APIキーを入力してください" });
-      return;
-    }
-
     const endpoint = getEndpoint();
     dispatch({ type: "loading", loading: true });
 
@@ -45,7 +36,7 @@ export function createWebAdapter(
       const res = await fetch(`${endpoint}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ repoUrl, prompt, apiKey, currentDag }),
+        body: JSON.stringify({ repoUrl, prompt, currentDag }),
       });
 
       if (!res.ok) {

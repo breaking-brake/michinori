@@ -4,7 +4,6 @@ import type { AnalyzeResponseType, MichinoriFileType, DagNodeType } from "@michi
 export interface AnalyzeParams {
   repoUrl: string;
   prompt: string;
-  apiKey: string;
   currentDag: MichinoriFileType | null;
 }
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 const EnvSchema = z.object({
   PORT: z.coerce.number().default(8080),
   NODE_ENV: z.enum(["development", "production"]).default("development"),
+  GEMINI_API_KEY: z.string().min(1),
 });
 
 function loadEnv() {

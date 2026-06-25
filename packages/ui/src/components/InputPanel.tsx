@@ -12,16 +12,13 @@ const inputStyle = {
 interface InputPanelProps {
   onSubmit: (repoUrl: string, prompt: string) => void;
   loading: boolean;
-  apiKey?: string;
-  onApiKeyChange?: (key: string) => void;
 }
 
-export function InputPanel({ onSubmit, loading, apiKey, onApiKeyChange }: InputPanelProps) {
+export function InputPanel({ onSubmit, loading }: InputPanelProps) {
   const [repoUrl, setRepoUrl] = useState("");
   const [prompt, setPrompt] = useState("");
 
-  const needsApiKey = onApiKeyChange !== undefined && !apiKey;
-  const canSubmit = repoUrl && prompt && !loading && !needsApiKey;
+  const canSubmit = repoUrl && prompt && !loading;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -39,15 +36,6 @@ export function InputPanel({ onSubmit, loading, apiKey, onApiKeyChange }: InputP
         background: "var(--vscode-sideBar-background, #252526)",
       }}
     >
-      {onApiKeyChange !== undefined && (
-        <input
-          type="password"
-          placeholder="Gemini APIキー（Google AI Studio）"
-          value={apiKey ?? ""}
-          onChange={(e) => onApiKeyChange(e.target.value)}
-          style={inputStyle}
-        />
-      )}
       <input
         type="text"
         placeholder="https://github.com/owner/repo"

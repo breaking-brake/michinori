@@ -24,10 +24,6 @@
         "title": "Michinori: DAGを修正"
       },
       {
-        "command": "michinori.setApiKey",
-        "title": "Michinori: APIキーを設定"
-      },
-      {
         "command": "michinori.openDag",
         "title": "Michinori: DAGを開く"
       }

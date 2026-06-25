@@ -4,7 +4,6 @@ import { DagNode, MichinoriFile } from "./dag.js";
 export const AnalyzeRequest = z.object({
   repoUrl: z.string().url().startsWith("https://github.com/"),
   prompt: z.string().min(1).max(2000),
-  apiKey: z.string().min(1),
   currentDag: MichinoriFile.nullable().default(null),
 });
 export type AnalyzeRequest = z.infer<typeof AnalyzeRequest>;

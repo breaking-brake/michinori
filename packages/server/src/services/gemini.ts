@@ -33,10 +33,10 @@ export interface GenerateDagResult {
 }
 
 export async function generateDag(
-  apiKey: string,
   userPrompt: string,
 ): Promise<GenerateDagResult> {
-  const ai = new GoogleGenAI({ apiKey });
+  const { env } = await import("../config/env.js");
+  const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
   logger.info("gemini:call", { model: MODEL, promptLength: userPrompt.length });
 

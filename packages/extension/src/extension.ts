@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { DagPanel } from "./panels/dagPanel";
 import { callAnalyze } from "./services/apiClient";
-import { ensureApiKey, setApiKey } from "./services/secretStorage";
 import { readDagFile, writeDagFile, buildMichinoriFile } from "./services/dagFile";
 import { computeCriticalPath } from "@michinori/shared";
 import type { WebviewToExtension, DagNodeType, NodeStatusType } from "@michinori/shared";
@@ -38,15 +37,11 @@ export function activate(context: vscode.ExtensionContext) {
         break;
       }
       case "generate": {
-        const apiKey = await ensureApiKey(context.secrets);
-        if (!apiKey) return;
-
         panel.postMessage({ type: "loading", loading: true });
         try {
           const result = await callAnalyze({
             repoUrl: msg.repoUrl,
             prompt: msg.prompt,
-            apiKey,
             currentDag: null,
           });
           currentNodes = result.nodes;
@@ -62,9 +57,6 @@ export function activate(context: vscode.ExtensionContext) {
         break;
       }
       case "modify": {
-        const apiKey = await ensureApiKey(context.secrets);
-        if (!apiKey) return;
-
         const existing = await readDagFile();
         if (!existing) {
           vscode.window.showWarningMessage("先にDAGを生成してください");
@@ -76,7 +68,6 @@ export function activate(context: vscode.ExtensionContext) {
           const result = await callAnalyze({
             repoUrl: existing.metadata.repoUrl,
             prompt: msg.prompt,
-            apiKey,
             currentDag: existing,
           });
           currentNodes = result.nodes;
@@ -123,18 +114,6 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("michinori.openDag", async () => {
       const panel = DagPanel.createOrShow(context.extensionUri);
       panel.setMessageHandler((msg) => handleWebviewMessage(msg, panel));
-    }),
-
-    vscode.commands.registerCommand("michinori.setApiKey", async () => {
-      const key = await vscode.window.showInputBox({
-        prompt: "Gemini APIキーを入力してください（Google AI Studio）",
-        password: true,
-        ignoreFocusOut: true,
-      });
-      if (key) {
-        await setApiKey(context.secrets, key);
-        vscode.window.showInformationMessage("APIキーを保存しました");
-      }
     }),
   );
 }

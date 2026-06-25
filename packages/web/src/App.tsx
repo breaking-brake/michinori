@@ -1,0 +1,20 @@
+import { useMemo } from "react";
+import { DagApp, useDagMessages } from "@michinori/ui";
+import { createWebAdapter } from "./webAdapter";
+
+export default function App() {
+  const { state, dispatch } = useDagMessages();
+  const adapter = useMemo(() => createWebAdapter(dispatch), [dispatch]);
+
+  return (
+    <DagApp
+      adapter={adapter}
+      dispatch={dispatch}
+      nodes={state.nodes}
+      derived={state.derived}
+      loading={state.loading}
+      error={state.error}
+      hasDag={state.hasDag}
+    />
+  );
+}

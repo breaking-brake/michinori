@@ -1,4 +1,4 @@
-import type { DagNodeType, DagDerivedType } from "@michinori/shared";
+import type { DagNode as DagNodeType, DagDerived as DagDerivedType } from "../schema/dag.js";
 
 export type ExtensionToWebview =
   | { type: "dagUpdate"; nodes: DagNodeType[]; derived: DagDerivedType }

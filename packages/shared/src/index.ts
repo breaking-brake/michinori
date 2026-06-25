@@ -21,3 +21,10 @@ export type {
   AnalyzeResponse as AnalyzeResponseType,
   ErrorResponse as ErrorResponseType,
 } from "./schema/api.js";
+
+export { computeCriticalPath } from "./utils/criticalPath.js";
+
+export type {
+  ExtensionToWebview,
+  WebviewToExtension,
+} from "./types/messages.js";

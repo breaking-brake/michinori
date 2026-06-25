@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import type { ExtensionToWebview, WebviewToExtension } from "../types/messages";
+import type { ExtensionToWebview, WebviewToExtension } from "@michinori/shared";
 
 export class DagPanel {
   public static current: DagPanel | undefined;

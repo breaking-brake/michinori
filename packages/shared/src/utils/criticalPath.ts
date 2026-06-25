@@ -1,4 +1,4 @@
-import type { DagNodeType, DagDerivedType, NodeStatusType } from "@michinori/shared";
+import type { DagNode as DagNodeType, DagDerived as DagDerivedType, NodeStatus as NodeStatusType } from "../schema/dag.js";
 
 function getRemainingHours(node: DagNodeType): number {
   switch (node.status as NodeStatusType) {

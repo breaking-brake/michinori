@@ -3,9 +3,8 @@ import { DagPanel } from "./panels/dagPanel";
 import { callAnalyze } from "./services/apiClient";
 import { ensureApiKey, setApiKey } from "./services/secretStorage";
 import { readDagFile, writeDagFile, buildMichinoriFile } from "./services/dagFile";
-import { computeCriticalPath } from "./dag/criticalPath";
-import type { WebviewToExtension } from "./types/messages";
-import type { DagNodeType, NodeStatusType } from "@michinori/shared";
+import { computeCriticalPath } from "@michinori/shared";
+import type { WebviewToExtension, DagNodeType, NodeStatusType } from "@michinori/shared";
 
 export function activate(context: vscode.ExtensionContext) {
   let currentNodes: DagNodeType[] = [];

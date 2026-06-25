@@ -1,12 +1,14 @@
 {
-  "name": "michinori-webview",
+  "name": "@michinori/web",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@michinori/shared": "workspace:*",
     "@michinori/ui": "workspace:*",
     "@xyflow/react": "^12.6.0",
     "react": "^19.1.0",

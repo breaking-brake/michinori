@@ -26,7 +26,7 @@ interface NodeDetailPanelProps {
   status: string;
   description: string;
   estimateMd: number;
-  onUpdate: (fields: { label?: string; status?: string; description?: string }) => void;
+  onUpdate: (fields: { label?: string; status?: string; description?: string; estimateMd?: number }) => void;
   onClose: () => void;
 }
 
@@ -34,18 +34,21 @@ export function NodeDetailPanel({ nodeId, label, status, description, estimateMd
   const [editLabel, setEditLabel] = useState(label);
   const [editStatus, setEditStatus] = useState(status);
   const [editDescription, setEditDescription] = useState(description);
+  const [editEstimateMd, setEditEstimateMd] = useState(estimateMd);
 
   useEffect(() => {
     setEditLabel(label);
     setEditStatus(status);
     setEditDescription(description);
-  }, [nodeId, label, status, description]);
+    setEditEstimateMd(estimateMd);
+  }, [nodeId, label, status, description, estimateMd]);
 
   const handleSave = () => {
-    const fields: { label?: string; status?: string; description?: string } = {};
+    const fields: { label?: string; status?: string; description?: string; estimateMd?: number } = {};
     if (editLabel !== label) fields.label = editLabel;
     if (editStatus !== status) fields.status = editStatus;
     if (editDescription !== description) fields.description = editDescription;
+    if (editEstimateMd !== estimateMd) fields.estimateMd = editEstimateMd;
     if (Object.keys(fields).length > 0) {
       onUpdate(fields);
     }
@@ -141,8 +144,15 @@ export function NodeDetailPanel({ nodeId, label, status, description, estimateMd
         </div>
 
         <div>
-          <div style={labelStyle}>工数</div>
-          <div style={{ fontSize: 13 }}>{estimateMd}MD</div>
+          <div style={labelStyle}>工数 (MD)</div>
+          <input
+            type="number"
+            min="0.1"
+            step="0.1"
+            value={editEstimateMd}
+            onChange={(e) => setEditEstimateMd(Math.round(parseFloat(e.target.value || "0.1") * 10) / 10)}
+            style={inputStyle}
+          />
         </div>
 
         <button

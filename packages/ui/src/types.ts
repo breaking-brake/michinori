@@ -5,7 +5,7 @@ export interface DagAdapter {
   modify(prompt: string): void;
   changeStatus(nodeId: string, status: string): void;
   changePosition(nodeId: string, x: number, y: number): void;
-  updateNode(nodeId: string, fields: { label?: string; status?: string; description?: string }): void;
+  updateNode(nodeId: string, fields: { label?: string; status?: string; description?: string; estimateMd?: number }): void;
   onReady(): void;
   reset(): void;
   save(): void;

@@ -107,7 +107,7 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
         position: n.position ?? positions.get(n.id) ?? { x: 0, y: 0 },
         data: {
           label: n.label,
-          estimateHours: n.estimateHours,
+          estimateMd: n.estimateMd,
           status: n.status,
           description: n.description,
           onCriticalPath: criticalSet.has(n.id),
@@ -173,7 +173,7 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
     <div style={{ width: "100vw", height: "100vh", display: "flex", flexDirection: "column" }}>
       <Header
         completionDate={derived?.estimatedCompletionDate ?? null}
-        remainingHours={derived?.remainingHours ?? 0}
+        remainingMd={derived?.remainingMd ?? 0}
         onSave={() => adapter.save()}
         onLoad={() => adapter.load()}
         onReset={() => {
@@ -218,7 +218,7 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
             label={selectedDagNode.label}
             status={selectedDagNode.status}
             description={selectedDagNode.description}
-            estimateHours={selectedDagNode.estimateHours}
+            estimateMd={selectedDagNode.estimateMd}
             onUpdate={(fields) => {
               adapter.updateNode(selectedDagNode.id, fields);
               setSelectedNodeId(null);

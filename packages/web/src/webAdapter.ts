@@ -156,7 +156,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
     },
     reset: () => {
       localStorage.removeItem(DAG_STORAGE);
-      dispatch({ type: "dagUpdate", nodes: [], derived: { criticalPath: [], estimatedCompletionDate: "", totalEstimateHours: 0, remainingHours: 0 } });
+      dispatch({ type: "dagUpdate", nodes: [], derived: { criticalPath: [], estimatedCompletionDate: "", totalEstimateMd: 0, remainingMd: 0 } });
     },
   };
 }

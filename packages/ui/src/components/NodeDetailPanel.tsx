@@ -25,12 +25,12 @@ interface NodeDetailPanelProps {
   label: string;
   status: string;
   description: string;
-  estimateHours: number;
+  estimateMd: number;
   onUpdate: (fields: { label?: string; status?: string; description?: string }) => void;
   onClose: () => void;
 }
 
-export function NodeDetailPanel({ nodeId, label, status, description, estimateHours, onUpdate, onClose }: NodeDetailPanelProps) {
+export function NodeDetailPanel({ nodeId, label, status, description, estimateMd, onUpdate, onClose }: NodeDetailPanelProps) {
   const [editLabel, setEditLabel] = useState(label);
   const [editStatus, setEditStatus] = useState(status);
   const [editDescription, setEditDescription] = useState(description);
@@ -142,7 +142,7 @@ export function NodeDetailPanel({ nodeId, label, status, description, estimateHo
 
         <div>
           <div style={labelStyle}>工数</div>
-          <div style={{ fontSize: 13 }}>{estimateHours}h</div>
+          <div style={{ fontSize: 13 }}>{estimateMd}MD</div>
         </div>
 
         <button

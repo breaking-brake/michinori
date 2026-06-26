@@ -1,16 +1,16 @@
 import type { DagNode as DagNodeType, DagDerived as DagDerivedType, NodeStatus as NodeStatusType } from "../schema/dag.js";
 
-function getRemainingHours(node: DagNodeType): number {
+function getRemainingMd(node: DagNodeType): number {
   switch (node.status as NodeStatusType) {
     case "完了":
       return 0;
     case "進行中":
-      return node.estimateHours * 0.5;
+      return node.estimateMd * 0.5;
     case "PR Open":
       return 0;
     case "未着手":
     default:
-      return node.estimateHours;
+      return node.estimateMd;
   }
 }
 
@@ -53,7 +53,7 @@ export function computeCriticalPath(nodes: DagNodeType[]): DagDerivedType {
   // Longest path DP
   for (const id of sorted) {
     const node = nodeMap.get(id)!;
-    const remaining = getRemainingHours(node);
+    const remaining = getRemainingMd(node);
 
     let maxPredDist = 0;
     let maxPred: string | null = null;
@@ -88,21 +88,21 @@ export function computeCriticalPath(nodes: DagNodeType[]): DagDerivedType {
     current = prev.get(current) ?? null;
   }
 
-  const totalEstimateHours = nodes.reduce((sum, n) => sum + n.estimateHours, 0);
-  const remainingHours = maxDist;
+  const totalEstimateMd = nodes.reduce((sum, n) => sum + n.estimateMd, 0);
+  const remainingMd = maxDist;
 
   return {
     criticalPath,
-    estimatedCompletionDate: computeCompletionDate(remainingHours),
-    totalEstimateHours,
-    remainingHours,
+    estimatedCompletionDate: computeCompletionDate(remainingMd),
+    totalEstimateMd,
+    remainingMd,
   };
 }
 
-function computeCompletionDate(remainingHours: number, hoursPerDay = 6): string {
-  if (remainingHours <= 0) return new Date().toISOString().split("T")[0];
+function computeCompletionDate(remainingMd: number): string {
+  if (remainingMd <= 0) return new Date().toISOString().split("T")[0];
 
-  let daysNeeded = Math.ceil(remainingHours / hoursPerDay);
+  let daysNeeded = Math.ceil(remainingMd);
   const date = new Date();
 
   while (daysNeeded > 0) {

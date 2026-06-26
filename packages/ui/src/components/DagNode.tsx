@@ -12,7 +12,7 @@ const STATUS_COLORS: Record<Status, string> = {
 
 interface DagNodeData {
   label: string;
-  estimateHours: number;
+  estimateMd: number;
   status: Status;
   description: string;
   onCriticalPath?: boolean;
@@ -62,7 +62,7 @@ export const DagNode = memo(({ data }: NodeProps) => {
         >
           {d.status}
         </span>
-        <span style={{ fontSize: 11, opacity: 0.7 }}>{d.estimateHours}h</span>
+        <span style={{ fontSize: 11, opacity: 0.7 }}>{d.estimateMd}MD</span>
       </div>
       <Handle type="source" position={Position.Bottom} />
     </div>

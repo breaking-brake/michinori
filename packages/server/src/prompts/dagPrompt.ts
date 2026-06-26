@@ -7,13 +7,13 @@ Return a JSON object with a single "nodes" array. Each node has:
 - id: unique kebab-case identifier (e.g. "setup-auth", "create-user-api")
 - label: short task name (Japanese is preferred)
 - description: 1-2 sentence explanation of what the task involves
-- estimateHours: realistic time estimate (2-40 hours per task)
+- estimateMd: realistic time estimate in man-days (1 MD = 8 hours). Use 0.1 MD increments (e.g. 0.5, 1.0, 2.5)
 - status: always "未着手" for new tasks
 - dependencies: array of prerequisite task IDs (MUST form a DAG — no cycles)
 
 RULES:
 - Generate 5-20 tasks depending on project complexity
-- Tasks should be granular enough to be actionable (2-40 hours each)
+- Tasks should be granular enough to be actionable (0.5-5 MD each)
 - Every dependency ID must reference another node's ID in the same output
 - Dependencies MUST form a DAG (no circular references)
 - Consider the actual codebase structure — don't ignore existing code

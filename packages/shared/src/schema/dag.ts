@@ -7,7 +7,7 @@ export const DagNode = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
   description: z.string(),
-  estimateHours: z.number().positive(),
+  estimateMd: z.number().positive(),
   status: NodeStatus.default("未着手"),
   dependencies: z.array(z.string()).default([]),
   position: z
@@ -22,8 +22,8 @@ export type DagNode = z.infer<typeof DagNode>;
 export const DagDerived = z.object({
   criticalPath: z.array(z.string()),
   estimatedCompletionDate: z.string(),
-  totalEstimateHours: z.number(),
-  remainingHours: z.number(),
+  totalEstimateMd: z.number(),
+  remainingMd: z.number(),
 });
 export type DagDerived = z.infer<typeof DagDerived>;
 

@@ -11,13 +11,13 @@ const headerBtnStyle = {
 
 interface HeaderProps {
   completionDate: string | null;
-  remainingHours: number;
+  remainingMd: number;
   onReset?: () => void;
   onSave?: () => void;
   onLoad?: () => void;
 }
 
-export function Header({ completionDate, remainingHours, onReset, onSave, onLoad }: HeaderProps) {
+export function Header({ completionDate, remainingMd, onReset, onSave, onLoad }: HeaderProps) {
   return (
     <div
       style={{
@@ -37,7 +37,7 @@ export function Header({ completionDate, remainingHours, onReset, onSave, onLoad
           <span>
             完了予定: <strong>{completionDate}</strong>
           </span>
-          <span style={{ opacity: 0.6 }}>残り {remainingHours}h</span>
+          <span style={{ opacity: 0.6 }}>残り {remainingMd}MD</span>
         </>
       ) : (
         <span style={{ opacity: 0.6 }}>DAGを生成してください</span>

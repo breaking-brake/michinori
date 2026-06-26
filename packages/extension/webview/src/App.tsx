@@ -49,6 +49,10 @@ export default function App() {
         vscode?.postMessage({ type: "positionChange", nodeId, x, y }),
       onReady: () =>
         vscode?.postMessage({ type: "ready" }),
+      save: () =>
+        vscode?.postMessage({ type: "save" }),
+      load: () =>
+        vscode?.postMessage({ type: "load" }),
       reset: () =>
         vscode?.postMessage({ type: "reset" }),
     }),

@@ -124,6 +124,36 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
         dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
       }
     },
+    save: () => {
+      const dag = getDag();
+      if (!dag) return;
+      const blob = new Blob([JSON.stringify(dag, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = ".michinori.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    load: () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const dag = JSON.parse(text) as MichinoriFileType;
+          if (!dag.version || !dag.nodes) throw new Error("Invalid format");
+          saveDag(dag);
+          dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
+        } catch {
+          dispatch({ type: "error", message: "ファイルの読み込みに失敗しました" });
+        }
+      };
+      input.click();
+    },
     reset: () => {
       localStorage.removeItem(DAG_STORAGE);
       dispatch({ type: "dagUpdate", nodes: [], derived: { criticalPath: [], estimatedCompletionDate: "", totalEstimateHours: 0, remainingHours: 0 } });

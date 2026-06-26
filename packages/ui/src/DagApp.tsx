@@ -174,6 +174,8 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
       <Header
         completionDate={derived?.estimatedCompletionDate ?? null}
         remainingHours={derived?.remainingHours ?? 0}
+        onSave={() => adapter.save()}
+        onLoad={() => adapter.load()}
         onReset={() => {
           if (window.confirm("DAGをリセットしますか？")) {
             setFlowNodes([]);

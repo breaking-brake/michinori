@@ -8,6 +8,8 @@ export interface DagAdapter {
   updateNode(nodeId: string, fields: { label?: string; status?: string; description?: string }): void;
   onReady(): void;
   reset(): void;
+  save(): void;
+  load(): void;
 }
 
 export interface DagUpdate {

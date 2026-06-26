@@ -8,3 +8,4 @@ export { Header } from "./components/Header";
 export { InputPanel } from "./components/InputPanel";
 export { ModifyPanel } from "./components/ModifyPanel";
 export { LoadingOverlay } from "./components/LoadingOverlay";
+export { NodeDetailPanel } from "./components/NodeDetailPanel";

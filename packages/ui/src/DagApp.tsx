@@ -16,6 +16,7 @@ import { Header } from "./components/Header";
 import { InputPanel } from "./components/InputPanel";
 import { ModifyPanel } from "./components/ModifyPanel";
 import { LoadingOverlay } from "./components/LoadingOverlay";
+import { NodeDetailPanel } from "./components/NodeDetailPanel";
 import type { DagAdapter, DagMessage } from "./types";
 import type { DagNodeType, DagDerivedType } from "@michinori/shared";
 
@@ -89,6 +90,9 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
 export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  const selectedDagNode = selectedNodeId ? dagNodes.find((n) => n.id === selectedNodeId) : null;
 
   useEffect(() => {
     if (!derived || dagNodes.length === 0) return;
@@ -150,13 +154,9 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
 
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
-      const statusCycle = ["未着手", "進行中", "PR Open", "完了"];
-      const currentStatus = (node.data as { status: string }).status;
-      const idx = statusCycle.indexOf(currentStatus);
-      const nextStatus = statusCycle[(idx + 1) % statusCycle.length];
-      adapter.changeStatus(node.id, nextStatus);
+      setSelectedNodeId(node.id);
     },
-    [adapter],
+    [],
   );
 
   const handleGenerate = useCallback(
@@ -210,6 +210,20 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
           <Controls />
         </ReactFlow>
         {hasDag && <ModifyPanel onSubmit={handleModify} loading={loading} />}
+        {selectedDagNode && (
+          <NodeDetailPanel
+            nodeId={selectedDagNode.id}
+            label={selectedDagNode.label}
+            status={selectedDagNode.status}
+            description={selectedDagNode.description}
+            estimateHours={selectedDagNode.estimateHours}
+            onUpdate={(fields) => {
+              adapter.updateNode(selectedDagNode.id, fields);
+              setSelectedNodeId(null);
+            }}
+            onClose={() => setSelectedNodeId(null)}
+          />
+        )}
         {loading && <LoadingOverlay />}
       </div>
     </div>

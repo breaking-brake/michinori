@@ -43,6 +43,8 @@ export default function App() {
         vscode?.postMessage({ type: "modify", prompt }),
       changeStatus: (nodeId, status) =>
         vscode?.postMessage({ type: "statusChange", nodeId, status }),
+      updateNode: (nodeId, fields) =>
+        vscode?.postMessage({ type: "updateNode", nodeId, fields }),
       changePosition: (nodeId, x, y) =>
         vscode?.postMessage({ type: "positionChange", nodeId, x, y }),
       onReady: () =>

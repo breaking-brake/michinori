@@ -95,6 +95,20 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
         dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
       }
     },
+    updateNode: (nodeId, fields) => {
+      const dag = getDag();
+      if (!dag) return;
+      const node = dag.nodes.find((n) => n.id === nodeId);
+      if (node) {
+        if (fields.label !== undefined) (node as { label: string }).label = fields.label;
+        if (fields.status !== undefined) (node as { status: string }).status = fields.status;
+        if (fields.description !== undefined) (node as { description: string }).description = fields.description;
+        dag.derived = computeCriticalPath(dag.nodes);
+        dag.metadata.updatedAt = new Date().toISOString();
+        saveDag(dag);
+        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
+      }
+    },
     changePosition: (nodeId, x, y) => {
       const dag = getDag();
       if (!dag) return;

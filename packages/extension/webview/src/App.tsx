@@ -45,6 +45,14 @@ export default function App() {
         vscode?.postMessage({ type: "statusChange", nodeId, status }),
       updateNode: (nodeId, fields) =>
         vscode?.postMessage({ type: "updateNode", nodeId, fields }),
+      addNode: (position) =>
+        vscode?.postMessage({ type: "addNode", position }),
+      deleteNode: (nodeId) =>
+        vscode?.postMessage({ type: "deleteNode", nodeId }),
+      addEdge: (sourceId, targetId) =>
+        vscode?.postMessage({ type: "addEdge", sourceId, targetId }),
+      removeEdge: (sourceId, targetId) =>
+        vscode?.postMessage({ type: "removeEdge", sourceId, targetId }),
       changePosition: (nodeId, x, y) =>
         vscode?.postMessage({ type: "positionChange", nodeId, x, y }),
       onReady: () =>

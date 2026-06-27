@@ -111,6 +111,60 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
         dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
       }
     },
+    addNode: (position) => {
+      const dag = getDag();
+      if (!dag) return;
+      const id = `task-${Date.now()}`;
+      const newNode: DagNodeType = {
+        id,
+        label: "新しいタスク",
+        description: "",
+        estimateMd: 1,
+        category: "実装",
+        status: "未着手",
+        dependencies: [],
+        position,
+      };
+      dag.nodes.push(newNode);
+      dag.derived = computeCriticalPath(dag.nodes);
+      dag.metadata.updatedAt = new Date().toISOString();
+      saveDag(dag);
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
+    },
+    deleteNode: (nodeId) => {
+      const dag = getDag();
+      if (!dag) return;
+      dag.nodes = dag.nodes.filter((n) => n.id !== nodeId);
+      for (const node of dag.nodes) {
+        node.dependencies = node.dependencies.filter((d) => d !== nodeId);
+      }
+      dag.derived = computeCriticalPath(dag.nodes);
+      dag.metadata.updatedAt = new Date().toISOString();
+      saveDag(dag);
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
+    },
+    addEdge: (sourceId, targetId) => {
+      const dag = getDag();
+      if (!dag) return;
+      const target = dag.nodes.find((n) => n.id === targetId);
+      if (!target || target.dependencies.includes(sourceId)) return;
+      target.dependencies.push(sourceId);
+      dag.derived = computeCriticalPath(dag.nodes);
+      dag.metadata.updatedAt = new Date().toISOString();
+      saveDag(dag);
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
+    },
+    removeEdge: (sourceId, targetId) => {
+      const dag = getDag();
+      if (!dag) return;
+      const target = dag.nodes.find((n) => n.id === targetId);
+      if (!target) return;
+      target.dependencies = target.dependencies.filter((d) => d !== sourceId);
+      dag.derived = computeCriticalPath(dag.nodes);
+      dag.metadata.updatedAt = new Date().toISOString();
+      saveDag(dag);
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
+    },
     changePosition: (nodeId, x, y) => {
       const dag = getDag();
       if (!dag) return;

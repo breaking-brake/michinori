@@ -3,12 +3,16 @@ import {
   ReactFlow,
   Background,
   Controls,
+  Panel,
   type Node,
   type Edge,
   type OnNodesChange,
   type OnEdgesChange,
+  type Connection,
   applyNodeChanges,
   applyEdgeChanges,
+  useReactFlow,
+  ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { DagNode } from "./components/DagNode";
@@ -87,15 +91,20 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt }: DagAppProps) {
+function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const reactFlow = useReactFlow();
 
   const selectedDagNode = selectedNodeId ? dagNodes.find((n) => n.id === selectedNodeId) : null;
 
   useEffect(() => {
-    if (!derived || dagNodes.length === 0) return;
+    if (!derived || dagNodes.length === 0) {
+      setFlowNodes([]);
+      setFlowEdges([]);
+      return;
+    }
 
     const criticalSet = new Set(derived.criticalPath);
     const positions = autoLayout(dagNodes);
@@ -160,6 +169,33 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
     [],
   );
 
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      if (connection.source && connection.target) {
+        adapter.addEdge(connection.source, connection.target);
+      }
+    },
+    [adapter],
+  );
+
+  const handleEdgeClick = useCallback(
+    (_event: React.MouseEvent, edge: Edge) => {
+      if (window.confirm("この接続を削除しますか？")) {
+        adapter.removeEdge(edge.source, edge.target);
+      }
+    },
+    [adapter],
+  );
+
+  const handleAddNode = useCallback(() => {
+    const viewport = reactFlow.getViewport();
+    const position = reactFlow.screenToFlowPosition({
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+    });
+    adapter.addNode(position);
+  }, [adapter, reactFlow]);
+
   const handleGenerate = useCallback(
     (repoUrl: string, prompt: string) => adapter.generate(repoUrl, prompt),
     [adapter],
@@ -167,6 +203,16 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
 
   const handleModify = useCallback(
     (prompt: string) => adapter.modify(prompt),
+    [adapter],
+  );
+
+  const handleDeleteNode = useCallback(
+    (nodeId: string) => {
+      if (window.confirm("このノードを削除しますか？接続も一緒に削除されます。")) {
+        setSelectedNodeId(null);
+        adapter.deleteNode(nodeId);
+      }
+    },
     [adapter],
   );
 
@@ -206,11 +252,32 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
           onEdgesChange={onEdgesChange}
           onNodeDragStop={onNodeDragStop}
           onNodeClick={handleNodeClick}
+          onConnect={handleConnect}
+          onEdgeClick={handleEdgeClick}
           nodeTypes={nodeTypes}
           fitView
         >
           <Background />
           <Controls />
+          {hasDag && (
+            <Panel position="top-right">
+              <button
+                onClick={handleAddNode}
+                style={{
+                  padding: "6px 14px",
+                  background: "var(--vscode-button-background, #0e639c)",
+                  color: "var(--vscode-button-foreground, #fff)",
+                  border: "none",
+                  borderRadius: 4,
+                  cursor: "pointer",
+                  fontSize: 13,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                }}
+              >
+                + ノード追加
+              </button>
+            </Panel>
+          )}
         </ReactFlow>
         {hasDag && <ModifyPanel onSubmit={handleModify} loading={loading} />}
         {selectedDagNode && (
@@ -225,11 +292,20 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
               adapter.updateNode(selectedDagNode.id, fields);
               setSelectedNodeId(null);
             }}
+            onDelete={() => handleDeleteNode(selectedDagNode.id)}
             onClose={() => setSelectedNodeId(null)}
           />
         )}
         {loading && <LoadingOverlay />}
       </div>
     </div>
+  );
+}
+
+export function DagApp(props: DagAppProps) {
+  return (
+    <ReactFlowProvider>
+      <DagAppInner {...props} />
+    </ReactFlowProvider>
   );
 }

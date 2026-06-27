@@ -6,6 +6,10 @@ export interface DagAdapter {
   changeStatus(nodeId: string, status: string): void;
   changePosition(nodeId: string, x: number, y: number): void;
   updateNode(nodeId: string, fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number }): void;
+  addNode(position: { x: number; y: number }): void;
+  deleteNode(nodeId: string): void;
+  addEdge(sourceId: string, targetId: string): void;
+  removeEdge(sourceId: string, targetId: string): void;
   onReady(): void;
   reset(): void;
   save(): void;

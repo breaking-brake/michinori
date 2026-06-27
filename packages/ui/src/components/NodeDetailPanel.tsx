@@ -29,10 +29,11 @@ interface NodeDetailPanelProps {
   category: string;
   estimateMd: number;
   onUpdate: (fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number }) => void;
+  onDelete?: () => void;
   onClose: () => void;
 }
 
-export function NodeDetailPanel({ nodeId, label, status, category, description, estimateMd, onUpdate, onClose }: NodeDetailPanelProps) {
+export function NodeDetailPanel({ nodeId, label, status, category, description, estimateMd, onUpdate, onDelete, onClose }: NodeDetailPanelProps) {
   const [editLabel, setEditLabel] = useState(label);
   const [editStatus, setEditStatus] = useState(status);
   const [editCategory, setEditCategory] = useState(category);
@@ -195,6 +196,23 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
         >
           保存
         </button>
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            style={{
+              padding: "8px 16px",
+              background: "transparent",
+              color: "#ef4444",
+              border: "1px solid #ef4444",
+              borderRadius: 4,
+              cursor: "pointer",
+              fontSize: 13,
+              marginTop: 4,
+            }}
+          >
+            ノードを削除
+          </button>
+        )}
       </div>
     </div>
   );

@@ -63,6 +63,7 @@ pnpm --filter michinori-webview build
 
 - VSCode拡張機能でのローカルワークスペース対応
 - コミットやPRのアクティビティからステータスを自動更新
+- JIRAへのタスクエクスポート
 - [CC Workflow Studio](https://github.com/breaking-brake/cc-wf-studio)との連携により、計画から実装までの一貫した開発体験
 - etc.
 

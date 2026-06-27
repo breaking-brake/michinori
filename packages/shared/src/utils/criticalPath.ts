@@ -116,22 +116,27 @@ function getJpHolidayDates(year: number): Set<string> {
 function isWorkingDay(
   date: Date,
   holidayCache: Map<number, Set<string>>,
-  addedHolidays: Set<string>,
-  removedHolidays: Set<string>,
+  preset: string,
+  customDayOff: Set<string>,
+  customDayOn: Set<string>,
 ): boolean {
   const dateStr = date.toISOString().split("T")[0];
 
-  if (removedHolidays.has(dateStr)) return true;
-  if (addedHolidays.has(dateStr)) return false;
+  if (customDayOn.has(dateStr)) return true;
+  if (customDayOff.has(dateStr)) return false;
 
   const day = date.getDay();
-  if (day === 0 || day === 6) return false;
-
+  const isWeekend = day === 0 || day === 6;
   const year = date.getFullYear();
   if (!holidayCache.has(year)) {
     holidayCache.set(year, getJpHolidayDates(year));
   }
-  return !holidayCache.get(year)!.has(dateStr);
+  const isJpHoliday = holidayCache.get(year)!.has(dateStr);
+
+  if (preset === "weekend") {
+    return isWeekend || isJpHoliday;
+  }
+  return !isWeekend && !isJpHoliday;
 }
 
 function computeCompletionDate(remainingMd: number, calendar?: CalendarConfigType): string {
@@ -140,12 +145,13 @@ function computeCompletionDate(remainingMd: number, calendar?: CalendarConfigTyp
   let daysNeeded = Math.ceil(remainingMd);
   const date = new Date();
   const holidayCache = new Map<number, Set<string>>();
-  const addedHolidays = new Set(calendar?.addedHolidays ?? []);
-  const removedHolidays = new Set(calendar?.removedHolidays ?? []);
+  const preset = calendar?.preset ?? "weekday";
+  const customDayOff = new Set(calendar?.customDayOff ?? []);
+  const customDayOn = new Set(calendar?.customDayOn ?? []);
 
   while (daysNeeded > 0) {
     date.setDate(date.getDate() + 1);
-    if (isWorkingDay(date, holidayCache, addedHolidays, removedHolidays)) {
+    if (isWorkingDay(date, holidayCache, preset, customDayOff, customDayOn)) {
       daysNeeded--;
     }
   }

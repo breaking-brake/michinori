@@ -17,8 +17,9 @@ export default function App() {
       hasDag={state.hasDag}
       defaultRepoUrl={import.meta.env.DEV ? "https://github.com/breaking-brake/cc-wf-studio" : undefined}
       defaultPrompt="QwenCodeを対応プラットフォームとして追加したい"
-      addedHolidays={state.addedHolidays}
-      removedHolidays={state.removedHolidays}
+      calendarPreset={state.calendarPreset}
+      customDayOff={state.customDayOff}
+      customDayOn={state.customDayOn}
     />
   );
 }

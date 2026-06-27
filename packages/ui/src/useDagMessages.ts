@@ -8,8 +8,9 @@ export interface DagState {
   loading: boolean;
   error: string | null;
   hasDag: boolean;
-  addedHolidays: string[];
-  removedHolidays: string[];
+  calendarPreset: string;
+  customDayOff: string[];
+  customDayOn: string[];
 }
 
 const INITIAL_STATE: DagState = {
@@ -18,8 +19,9 @@ const INITIAL_STATE: DagState = {
   loading: false,
   error: null,
   hasDag: false,
-  addedHolidays: [],
-  removedHolidays: [],
+  calendarPreset: "weekday",
+  customDayOff: [],
+  customDayOn: [],
 };
 
 export function useDagMessages() {
@@ -34,8 +36,9 @@ export function useDagMessages() {
           derived: msg.derived,
           hasDag: msg.nodes.length > 0,
           error: null,
-          addedHolidays: msg.addedHolidays ?? prev.addedHolidays,
-          removedHolidays: msg.removedHolidays ?? prev.removedHolidays,
+          calendarPreset: msg.calendar?.preset ?? prev.calendarPreset,
+          customDayOff: msg.calendar?.customDayOff ?? prev.customDayOff,
+          customDayOn: msg.calendar?.customDayOn ?? prev.customDayOn,
         }));
         break;
       case "loading":

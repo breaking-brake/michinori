@@ -49,9 +49,13 @@ export const DagDerived = z.object({
 });
 export type DagDerived = z.infer<typeof DagDerived>;
 
+export const WorkdayPreset = z.enum(["weekday", "weekend"]);
+export type WorkdayPreset = z.infer<typeof WorkdayPreset>;
+
 export const CalendarConfig = z.object({
-  addedHolidays: z.array(z.string()).default([]),
-  removedHolidays: z.array(z.string()).default([]),
+  preset: WorkdayPreset.default("weekday"),
+  customDayOff: z.array(z.string()).default([]),
+  customDayOn: z.array(z.string()).default([]),
 });
 export type CalendarConfig = z.infer<typeof CalendarConfig>;
 

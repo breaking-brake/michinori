@@ -57,8 +57,8 @@ export default function App() {
         vscode?.postMessage({ type: "positionChange", nodeId, x, y }),
       onReady: () =>
         vscode?.postMessage({ type: "ready" }),
-      updateCalendar: (addedHolidays, removedHolidays) =>
-        vscode?.postMessage({ type: "updateCalendar", addedHolidays, removedHolidays }),
+      updateCalendar: (calendar) =>
+        vscode?.postMessage({ type: "updateCalendar", calendar }),
       save: () =>
         vscode?.postMessage({ type: "save" }),
       load: () =>
@@ -79,8 +79,9 @@ export default function App() {
       error={state.error}
       hasDag={state.hasDag}
       defaultPrompt="QwenCodeを対応プラットフォームとして追加したい"
-      addedHolidays={state.addedHolidays}
-      removedHolidays={state.removedHolidays}
+      calendarPreset={state.calendarPreset}
+      customDayOff={state.customDayOff}
+      customDayOn={state.customDayOn}
     />
   );
 }

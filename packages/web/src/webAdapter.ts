@@ -59,7 +59,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
         },
         nodes: data.nodes,
         derived,
-        calendar: currentDag?.calendar ?? { addedHolidays: [], removedHolidays: [] },
+        calendar: currentDag?.calendar ?? { preset: "weekday" as const, customDayOff: [], customDayOn: [] },
       };
 
       saveDag(dag);
@@ -93,7 +93,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
         dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
         dag.metadata.updatedAt = new Date().toISOString();
         saveDag(dag);
-        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
       }
     },
     updateNode: (nodeId, fields) => {
@@ -109,7 +109,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
         dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
         dag.metadata.updatedAt = new Date().toISOString();
         saveDag(dag);
-        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
       }
     },
     addNode: (position) => {
@@ -130,7 +130,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
       dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
-      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
     },
     deleteNode: (nodeId) => {
       const dag = getDag();
@@ -142,7 +142,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
       dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
-      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
     },
     addEdge: (sourceId, targetId) => {
       const dag = getDag();
@@ -153,7 +153,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
       dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
-      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
     },
     removeEdge: (sourceId, targetId) => {
       const dag = getDag();
@@ -164,7 +164,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
       dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
-      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
     },
     changePosition: (nodeId, x, y) => {
       const dag = getDag();
@@ -178,17 +178,21 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
     onReady: () => {
       const dag = getDag();
       if (dag) {
-        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
       }
     },
-    updateCalendar: (addedHolidays, removedHolidays) => {
+    updateCalendar: (update) => {
       const dag = getDag();
       if (!dag) return;
-      dag.calendar = { addedHolidays, removedHolidays };
+      dag.calendar = {
+        preset: (update.preset ?? dag.calendar?.preset ?? "weekday") as "weekday" | "weekend",
+        customDayOff: update.customDayOff ?? dag.calendar?.customDayOff ?? [],
+        customDayOn: update.customDayOn ?? dag.calendar?.customDayOn ?? [],
+      };
       dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
-      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
     },
     save: () => {
       const dag = getDag();
@@ -213,7 +217,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
           const dag = JSON.parse(text) as MichinoriFileType;
           if (!dag.version || !dag.nodes) throw new Error("Invalid format");
           saveDag(dag);
-          dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, addedHolidays: dag.calendar?.addedHolidays, removedHolidays: dag.calendar?.removedHolidays });
+          dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
         } catch {
           dispatch({ type: "error", message: "ファイルの読み込みに失敗しました" });
         }

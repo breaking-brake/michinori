@@ -5,6 +5,7 @@ export {
   NodeCategory,
   DagNode,
   DagDerived,
+  WorkdayPreset,
   CalendarConfig,
   MichinoriFile,
 } from "./schema/dag.js";

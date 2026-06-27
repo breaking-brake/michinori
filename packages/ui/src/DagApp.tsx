@@ -39,8 +39,9 @@ interface DagAppProps {
   hasDag: boolean;
   defaultRepoUrl?: string;
   defaultPrompt?: string;
-  addedHolidays?: string[];
-  removedHolidays?: string[];
+  calendarPreset?: string;
+  customDayOff?: string[];
+  customDayOn?: string[];
 }
 
 function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }> {
@@ -96,7 +97,7 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, addedHolidays = [], removedHolidays = [] }: DagAppProps) {
+function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [] }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -295,9 +296,10 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         )}
         {calendarOpen && (
           <CalendarPanel
-            addedHolidays={addedHolidays}
-            removedHolidays={removedHolidays}
-            onUpdate={(added, removed) => adapter.updateCalendar(added, removed)}
+            preset={calendarPreset}
+            customDayOff={customDayOff}
+            customDayOn={customDayOn}
+            onUpdate={(cal) => adapter.updateCalendar(cal)}
             onClose={() => setCalendarOpen(false)}
           />
         )}

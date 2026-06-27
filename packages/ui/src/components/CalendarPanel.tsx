@@ -2,9 +2,10 @@ import { useState, useMemo } from "react";
 import { getJpHolidays } from "@michinori/shared";
 
 interface CalendarPanelProps {
-  addedHolidays: string[];
-  removedHolidays: string[];
-  onUpdate: (addedHolidays: string[], removedHolidays: string[]) => void;
+  preset: string;
+  customDayOff: string[];
+  customDayOn: string[];
+  onUpdate: (calendar: { preset?: string; customDayOff?: string[]; customDayOn?: string[] }) => void;
   onClose: () => void;
 }
 
@@ -14,14 +15,14 @@ function toDateStr(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
-export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClose }: CalendarPanelProps) {
+export function CalendarPanel({ preset, customDayOff, customDayOn, onUpdate, onClose }: CalendarPanelProps) {
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
-  const added = useMemo(() => new Set(addedHolidays), [addedHolidays]);
-  const removed = useMemo(() => new Set(removedHolidays), [removedHolidays]);
+  const dayOffSet = useMemo(() => new Set(customDayOff), [customDayOff]);
+  const dayOnSet = useMemo(() => new Set(customDayOn), [customDayOn]);
 
   const jpHolidays = useMemo(() => {
     const map = new Map<string, string>();
@@ -32,68 +33,46 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
 
-  function isDefaultHoliday(dateStr: string): boolean {
+  function isDefaultWorkday(dateStr: string): boolean {
     const d = new Date(dateStr);
     const day = d.getDay();
-    return day === 0 || day === 6 || jpHolidays.has(dateStr);
+    const isWeekend = day === 0 || day === 6;
+    const isJpHoliday = jpHolidays.has(dateStr);
+
+    if (preset === "weekend") {
+      return isWeekend || isJpHoliday;
+    }
+    return !isWeekend && !isJpHoliday;
   }
 
-  function isHoliday(dateStr: string): boolean {
-    if (removed.has(dateStr)) return false;
-    if (added.has(dateStr)) return true;
-    return isDefaultHoliday(dateStr);
+  function isWorkday(dateStr: string): boolean {
+    if (dayOnSet.has(dateStr)) return true;
+    if (dayOffSet.has(dateStr)) return false;
+    return isDefaultWorkday(dateStr);
   }
 
   function toggleDay(dateStr: string) {
-    const newAdded = new Set(added);
-    const newRemoved = new Set(removed);
-    const defaultOff = isDefaultHoliday(dateStr);
+    const newDayOff = new Set(dayOffSet);
+    const newDayOn = new Set(dayOnSet);
+    const defaultWork = isDefaultWorkday(dateStr);
 
-    if (isHoliday(dateStr)) {
-      if (defaultOff) {
-        newAdded.delete(dateStr);
-        newRemoved.add(dateStr);
+    if (isWorkday(dateStr)) {
+      if (defaultWork) {
+        newDayOn.delete(dateStr);
+        newDayOff.add(dateStr);
       } else {
-        newAdded.delete(dateStr);
+        newDayOn.delete(dateStr);
       }
     } else {
-      if (defaultOff) {
-        newRemoved.delete(dateStr);
+      if (!defaultWork) {
+        newDayOff.delete(dateStr);
+        newDayOn.add(dateStr);
       } else {
-        newAdded.add(dateStr);
+        newDayOff.delete(dateStr);
       }
     }
 
-    onUpdate([...newAdded].sort(), [...newRemoved].sort());
-  }
-
-  function applyPreset(mode: "weekday" | "weekend") {
-    const newAdded = new Set(added);
-    const newRemoved = new Set(removed);
-    const holidayDates = new Set(getJpHolidays(viewYear).map((h) => h.date));
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateStr = toDateStr(viewYear, viewMonth, d);
-      if (dateStr < todayStr) continue;
-
-      const dayOfWeek = new Date(dateStr).getDay();
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      const isJpHoliday = holidayDates.has(dateStr);
-      const defaultOff = isWeekend || isJpHoliday;
-
-      if (mode === "weekday") {
-        newAdded.delete(dateStr);
-        newRemoved.delete(dateStr);
-      } else {
-        if (defaultOff) {
-          newRemoved.add(dateStr);
-        } else {
-          newAdded.add(dateStr);
-        }
-      }
-    }
-
-    onUpdate([...newAdded].sort(), [...newRemoved].sort());
+    onUpdate({ customDayOff: [...newDayOff].sort(), customDayOn: [...newDayOn].sort() });
   }
 
   function prevMonth() {
@@ -133,7 +112,7 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
         borderLeft: "1px solid var(--vscode-panel-border, #444)",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
+        overflow: "auto",
         color: "var(--vscode-foreground, #ccc)",
         fontSize: 13,
       }}
@@ -148,7 +127,7 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
           fontWeight: 600,
         }}
       >
-        <span>稼働日カレンダー</span>
+        <span>稼働日設定</span>
         <button
           onClick={onClose}
           style={{
@@ -165,7 +144,28 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
         </button>
       </div>
 
-      <div style={{ padding: "8px 16px" }}>
+      <div style={{ padding: "12px 16px" }}>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 6 }}>稼働日プリセット</div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              onClick={() => onUpdate({ preset: "weekday", customDayOff: [], customDayOn: [] })}
+              style={{ ...presetBtnStyle, ...(preset === "weekday" ? presetActiveStyle : {}) }}
+            >
+              平日稼働
+            </button>
+            <button
+              onClick={() => onUpdate({ preset: "weekend", customDayOff: [], customDayOn: [] })}
+              style={{ ...presetBtnStyle, ...(preset === "weekend" ? presetActiveStyle : {}) }}
+            >
+              休日稼働
+            </button>
+          </div>
+          <div style={{ fontSize: 10, opacity: 0.5, marginTop: 4 }}>
+            {preset === "weekday" ? "平日が稼働日（土日祝が休日）" : "土日祝が稼働日（平日が休日）"}
+          </div>
+        </div>
+
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <button onClick={prevMonth} style={navBtnStyle}>◀</button>
           <span style={{ fontWeight: 600 }}>{viewYear}年 {viewMonth + 1}月</span>
@@ -191,8 +191,8 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
             if (!cell) return <div key={`empty-${i}`} />;
 
             const isPast = cell.dateStr < todayStr;
-            const holiday = isHoliday(cell.dateStr);
-            const isCustom = added.has(cell.dateStr) || removed.has(cell.dateStr);
+            const workday = isWorkday(cell.dateStr);
+            const isCustom = dayOffSet.has(cell.dateStr) || dayOnSet.has(cell.dateStr);
             const holidayName = jpHolidays.get(cell.dateStr);
             const dayOfWeek = new Date(cell.dateStr).getDay();
 
@@ -200,14 +200,14 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
               <div
                 key={cell.dateStr}
                 onClick={isPast ? undefined : () => toggleDay(cell.dateStr)}
-                title={holidayName ?? (holiday ? "休日" : "稼働日")}
+                title={holidayName ?? (workday ? "稼働日" : "休日")}
                 style={{
                   padding: 4,
                   borderRadius: 4,
                   cursor: isPast ? "default" : "pointer",
                   opacity: isPast ? 0.3 : 1,
-                  background: holiday ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.15)",
-                  color: holiday
+                  background: workday ? "rgba(16, 185, 129, 0.35)" : "rgba(239, 68, 68, 0.2)",
+                  color: !workday
                     ? "#ef4444"
                     : dayOfWeek === 0
                       ? "#ef4444"
@@ -226,15 +226,10 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
         </div>
 
         <div style={{ marginTop: 12, fontSize: 11, opacity: 0.6, lineHeight: 1.6 }}>
-          <div><span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "rgba(16, 185, 129, 0.15)", verticalAlign: "middle", marginRight: 4 }} />稼働日</div>
+          <div><span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "rgba(16, 185, 129, 0.35)", verticalAlign: "middle", marginRight: 4 }} />稼働日</div>
           <div><span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "rgba(239, 68, 68, 0.2)", verticalAlign: "middle", marginRight: 4 }} />休日</div>
-          <div><span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, border: "1px solid #f59e0b", verticalAlign: "middle", marginRight: 4 }} />カスタム変更</div>
-          <div style={{ marginTop: 4 }}>クリックで稼働日/休日を切り替え</div>
-        </div>
-
-        <div style={{ marginTop: 12, display: "flex", gap: 6 }}>
-          <button onClick={() => applyPreset("weekday")} style={presetBtnStyle}>平日稼働</button>
-          <button onClick={() => applyPreset("weekend")} style={presetBtnStyle}>休日稼働</button>
+          <div><span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, border: "1px solid #f59e0b", verticalAlign: "middle", marginRight: 4 }} />個別変更</div>
+          <div style={{ marginTop: 4 }}>日付クリックで個別に切り替え</div>
         </div>
       </div>
     </div>
@@ -250,6 +245,12 @@ const presetBtnStyle = {
   borderRadius: 4,
   cursor: "pointer",
   fontSize: 12,
+} as const;
+
+const presetActiveStyle = {
+  background: "var(--vscode-button-background, #0e639c)",
+  color: "var(--vscode-button-foreground, #fff)",
+  borderColor: "var(--vscode-button-background, #0e639c)",
 } as const;
 
 const navBtnStyle = {

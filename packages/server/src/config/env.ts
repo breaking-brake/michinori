@@ -6,6 +6,7 @@ const EnvSchema = z.object({
   GEMINI_API_KEY: z.string().min(1),
   RATE_LIMIT_PER_IP: z.coerce.number().default(5),
   RATE_LIMIT_GLOBAL: z.coerce.number().default(30),
+  GEO_BLOCK_ENABLED: z.coerce.boolean().default(true),
 });
 
 function loadEnv() {

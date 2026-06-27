@@ -67,6 +67,35 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
     onUpdate([...newAdded].sort(), [...newRemoved].sort());
   }
 
+  function applyPreset(mode: "weekday" | "weekend") {
+    const newAdded = new Set(added);
+    const newRemoved = new Set(removed);
+    const holidayDates = new Set(getJpHolidays(viewYear).map((h) => h.date));
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = toDateStr(viewYear, viewMonth, d);
+      if (dateStr < todayStr) continue;
+
+      const dayOfWeek = new Date(dateStr).getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      const isJpHoliday = holidayDates.has(dateStr);
+      const defaultOff = isWeekend || isJpHoliday;
+
+      if (mode === "weekday") {
+        newAdded.delete(dateStr);
+        newRemoved.delete(dateStr);
+      } else {
+        if (defaultOff) {
+          newRemoved.add(dateStr);
+        } else {
+          newAdded.add(dateStr);
+        }
+      }
+    }
+
+    onUpdate([...newAdded].sort(), [...newRemoved].sort());
+  }
+
   function prevMonth() {
     if (viewMonth === 0) {
       setViewYear(viewYear - 1);
@@ -202,10 +231,26 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
           <div><span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, border: "1px solid #f59e0b", verticalAlign: "middle", marginRight: 4 }} />カスタム変更</div>
           <div style={{ marginTop: 4 }}>クリックで稼働日/休日を切り替え</div>
         </div>
+
+        <div style={{ marginTop: 12, display: "flex", gap: 6 }}>
+          <button onClick={() => applyPreset("weekday")} style={presetBtnStyle}>平日稼働</button>
+          <button onClick={() => applyPreset("weekend")} style={presetBtnStyle}>休日稼働</button>
+        </div>
       </div>
     </div>
   );
 }
+
+const presetBtnStyle = {
+  flex: 1,
+  padding: "6px 8px",
+  background: "var(--vscode-button-secondaryBackground, #3a3d41)",
+  color: "var(--vscode-button-secondaryForeground, #ccc)",
+  border: "1px solid var(--vscode-panel-border, #444)",
+  borderRadius: 4,
+  cursor: "pointer",
+  fontSize: 12,
+} as const;
 
 const navBtnStyle = {
   background: "none",

@@ -53,7 +53,7 @@ export const DagNode = memo(({ data }: NodeProps) => {
       }}
     >
       <Handle type="target" position={Position.Top} />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
         <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>{d.label}</span>
         <span
           style={{

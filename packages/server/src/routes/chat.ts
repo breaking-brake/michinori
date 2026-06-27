@@ -1,14 +1,11 @@
 import { Hono } from "hono";
 import { GoogleGenAI, Type, FunctionCallingConfigMode } from "@google/genai";
-import { ChatRequest, CATEGORY_DEFINITIONS, STATUS_DEFINITIONS } from "@michinori/shared";
+import { ChatRequest } from "@michinori/shared";
 import type { DagProposalType } from "@michinori/shared";
 import { buildChatSystemPrompt } from "../prompts/chatPrompt.js";
 import { logger } from "../utils/logger.js";
 
 const MODEL = "gemini-2.5-flash";
-
-const categoryValues = CATEGORY_DEFINITIONS.map((c) => c.value);
-const statusValues = STATUS_DEFINITIONS.map((s) => s.value);
 
 const proposeDagChangesTool = {
   functionDeclarations: [{
@@ -17,52 +14,16 @@ const proposeDagChangesTool = {
     parameters: {
       type: Type.OBJECT,
       properties: {
-        reasoning: { type: Type.STRING, description: "Why these changes are proposed (in Japanese)" },
-        additions: {
-          type: Type.ARRAY,
-          description: "New nodes to add",
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              id: { type: Type.STRING },
-              label: { type: Type.STRING },
-              description: { type: Type.STRING },
-              estimateMd: { type: Type.NUMBER },
-              category: { type: Type.STRING, enum: categoryValues },
-              status: { type: Type.STRING, enum: statusValues },
-              dependencies: { type: Type.ARRAY, items: { type: Type.STRING } },
-            },
-            required: ["id", "label", "description", "estimateMd", "category", "status", "dependencies"],
-          },
+        reasoning: {
+          type: Type.STRING,
+          description: "Why these changes are proposed (in Japanese)",
         },
-        removals: {
-          type: Type.ARRAY,
-          description: "IDs of nodes to remove",
-          items: { type: Type.STRING },
-        },
-        modifications: {
-          type: Type.ARRAY,
-          description: "Changes to existing nodes",
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              nodeId: { type: Type.STRING },
-              changes: {
-                type: Type.OBJECT,
-                properties: {
-                  label: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  estimateMd: { type: Type.NUMBER },
-                  category: { type: Type.STRING, enum: categoryValues },
-                  status: { type: Type.STRING, enum: statusValues },
-                },
-              },
-            },
-            required: ["nodeId", "changes"],
-          },
+        proposal_json: {
+          type: Type.STRING,
+          description: `A JSON string with the structure: { "additions": [{ "id": "kebab-id", "label": "タスク名", "description": "説明", "estimateMd": 1.0, "category": "実装", "status": "未着手", "dependencies": [] }], "removals": ["node-id-to-remove"], "modifications": [{ "nodeId": "existing-id", "changes": { "label": "新名", "estimateMd": 2.0 } }] }. All arrays are optional, include only what changes.`,
         },
       },
-      required: ["reasoning"],
+      required: ["reasoning", "proposal_json"],
     },
   }],
 };
@@ -111,6 +72,16 @@ chat.post("/", async (c) => {
     const candidate = response.candidates?.[0];
     const parts = candidate?.content?.parts ?? [];
 
+    logger.info("chat:raw_response", {
+      finishReason: candidate?.finishReason,
+      partsCount: parts.length,
+      partTypes: parts.map((p) => {
+        if (p.functionCall) return `functionCall:${p.functionCall.name}`;
+        if (p.text) return `text(${p.text.length}chars)`;
+        return "other";
+      }),
+    });
+
     const functionCallPart = parts.find((p) => p.functionCall);
     const textParts = parts.filter((p) => p.text).map((p) => p.text).join("");
 
@@ -119,23 +90,43 @@ chat.post("/", async (c) => {
 
     if (functionCallPart?.functionCall?.name === "propose_dag_changes") {
       const args = functionCallPart.functionCall.args as Record<string, unknown>;
-      proposal = {
-        reasoning: (args.reasoning as string) ?? "",
-        additions: (args.additions as DagProposalType["additions"]) ?? [],
-        removals: (args.removals as string[]) ?? [],
-        modifications: (args.modifications as DagProposalType["modifications"]) ?? [],
-      };
+      const reasoning = (args.reasoning as string) ?? "";
+      const proposalJsonStr = (args.proposal_json as string) ?? "{}";
+
+      logger.info("chat:function_call", { reasoning, proposalJson: proposalJsonStr.slice(0, 500) });
+
+      try {
+        const parsed = JSON.parse(proposalJsonStr) as {
+          additions?: DagProposalType["additions"];
+          removals?: string[];
+          modifications?: DagProposalType["modifications"];
+        };
+        proposal = {
+          reasoning,
+          additions: parsed.additions ?? [],
+          removals: parsed.removals ?? [],
+          modifications: parsed.modifications ?? [],
+        };
+      } catch (parseErr) {
+        logger.error("chat:proposal_parse_error", { error: String(parseErr), raw: proposalJsonStr.slice(0, 300) });
+        proposal = { reasoning, additions: [], removals: [], modifications: [] };
+      }
 
       if (!responseMessage) {
-        responseMessage = proposal.reasoning || "以下の変更を提案します。";
+        responseMessage = reasoning || "以下の変更を提案します。";
       }
     }
 
     if (!responseMessage) {
+      logger.warn("chat:empty_response", {
+        candidateExists: !!candidate,
+        contentExists: !!candidate?.content,
+        partsRaw: JSON.stringify(parts).slice(0, 500),
+      });
       responseMessage = "すみません、応答を生成できませんでした。もう一度お試しください。";
     }
 
-    logger.info("chat:done", { hasProposal: !!proposal });
+    logger.info("chat:done", { hasProposal: !!proposal, messageLength: responseMessage.length });
 
     return c.json({ message: responseMessage, proposal });
   } catch (err) {

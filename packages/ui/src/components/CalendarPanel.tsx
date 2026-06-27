@@ -16,6 +16,7 @@ function toDateStr(year: number, month: number, day: number): string {
 
 export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClose }: CalendarPanelProps) {
   const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
@@ -160,6 +161,7 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
           {cells.map((cell, i) => {
             if (!cell) return <div key={`empty-${i}`} />;
 
+            const isPast = cell.dateStr < todayStr;
             const holiday = isHoliday(cell.dateStr);
             const isCustom = added.has(cell.dateStr) || removed.has(cell.dateStr);
             const holidayName = jpHolidays.get(cell.dateStr);
@@ -168,12 +170,13 @@ export function CalendarPanel({ addedHolidays, removedHolidays, onUpdate, onClos
             return (
               <div
                 key={cell.dateStr}
-                onClick={() => toggleDay(cell.dateStr)}
+                onClick={isPast ? undefined : () => toggleDay(cell.dateStr)}
                 title={holidayName ?? (holiday ? "休日" : "稼働日")}
                 style={{
                   padding: 4,
                   borderRadius: 4,
-                  cursor: "pointer",
+                  cursor: isPast ? "default" : "pointer",
+                  opacity: isPast ? 0.3 : 1,
                   background: holiday ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.15)",
                   color: holiday
                     ? "#ef4444"

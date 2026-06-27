@@ -126,33 +126,13 @@ chat.post("/", async (c) => {
         modifications: (args.modifications as DagProposalType["modifications"]) ?? [],
       };
 
-      const functionResult = await ai.models.generateContent({
-        model: MODEL,
-        contents: [
-          ...contents,
-          { role: "model" as const, parts },
-          {
-            role: "user" as const,
-            parts: [{
-              functionResponse: {
-                name: "propose_dag_changes",
-                response: { status: "proposed", message: "提案をユーザーに表示します。" },
-              },
-            }],
-          },
-        ],
-        config: {
-          systemInstruction,
-          tools: [proposeDagChangesTool],
-          temperature: 0.7,
-        },
-      });
-
-      responseMessage = functionResult.text ?? proposal.reasoning;
+      if (!responseMessage) {
+        responseMessage = proposal.reasoning || "以下の変更を提案します。";
+      }
     }
 
     if (!responseMessage) {
-      responseMessage = "すみません、応答を生成できませんでした。";
+      responseMessage = "すみません、応答を生成できませんでした。もう一度お試しください。";
     }
 
     logger.info("chat:done", { hasProposal: !!proposal });

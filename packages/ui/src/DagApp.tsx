@@ -22,6 +22,7 @@ import { InputPanel } from "./components/InputPanel";
 import { ModifyPanel } from "./components/ModifyPanel";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { NodeDetailPanel } from "./components/NodeDetailPanel";
+import { CalendarPanel } from "./components/CalendarPanel";
 import type { DagAdapter, DagMessage } from "./types";
 import type { DagNodeType, DagDerivedType } from "@michinori/shared";
 
@@ -38,6 +39,8 @@ interface DagAppProps {
   hasDag: boolean;
   defaultRepoUrl?: string;
   defaultPrompt?: string;
+  addedHolidays?: string[];
+  removedHolidays?: string[];
 }
 
 function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }> {
@@ -93,10 +96,11 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt }: DagAppProps) {
+function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, addedHolidays = [], removedHolidays = [] }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const reactFlow = useReactFlow();
 
   const selectedDagNode = selectedNodeId ? dagNodes.find((n) => n.id === selectedNodeId) : null;
@@ -214,6 +218,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
       <Header
         completionDate={derived?.estimatedCompletionDate ?? null}
         remainingMd={derived?.remainingMd ?? 0}
+        onCalendar={() => { setCalendarOpen(!calendarOpen); setSelectedNodeId(null); }}
         onSave={() => adapter.save()}
         onLoad={() => adapter.load()}
         onReset={() => {
@@ -286,6 +291,14 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
               setSelectedNodeId(null);
             }}
             onClose={() => setSelectedNodeId(null)}
+          />
+        )}
+        {calendarOpen && (
+          <CalendarPanel
+            addedHolidays={addedHolidays}
+            removedHolidays={removedHolidays}
+            onUpdate={(added, removed) => adapter.updateCalendar(added, removed)}
+            onClose={() => setCalendarOpen(false)}
           />
         )}
         {loading && <LoadingOverlay />}

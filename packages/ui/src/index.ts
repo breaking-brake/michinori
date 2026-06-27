@@ -9,4 +9,5 @@ export { InputPanel } from "./components/InputPanel";
 export { ModifyPanel } from "./components/ModifyPanel";
 export { LoadingOverlay } from "./components/LoadingOverlay";
 export { NodeDetailPanel } from "./components/NodeDetailPanel";
+export { CalendarPanel } from "./components/CalendarPanel";
 export { DeletableEdge } from "./components/DeletableEdge";

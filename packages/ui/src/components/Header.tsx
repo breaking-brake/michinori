@@ -15,9 +15,10 @@ interface HeaderProps {
   onReset?: () => void;
   onSave?: () => void;
   onLoad?: () => void;
+  onCalendar?: () => void;
 }
 
-export function Header({ completionDate, remainingMd, onReset, onSave, onLoad }: HeaderProps) {
+export function Header({ completionDate, remainingMd, onReset, onSave, onLoad, onCalendar }: HeaderProps) {
   return (
     <div
       style={{
@@ -43,6 +44,9 @@ export function Header({ completionDate, remainingMd, onReset, onSave, onLoad }:
         <span style={{ opacity: 0.6 }}>DAGを生成してください</span>
       )}
       <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+        {onCalendar && (
+          <button onClick={onCalendar} style={headerBtnStyle}>カレンダー</button>
+        )}
         {onLoad && (
           <button onClick={onLoad} style={headerBtnStyle}>読込</button>
         )}

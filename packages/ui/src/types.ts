@@ -12,6 +12,7 @@ export interface DagAdapter {
   removeEdge(sourceId: string, targetId: string): void;
   onReady(): void;
   reset(): void;
+  updateCalendar(addedHolidays: string[], removedHolidays: string[]): void;
   save(): void;
   load(): void;
 }
@@ -22,6 +23,6 @@ export interface DagUpdate {
 }
 
 export type DagMessage =
-  | { type: "dagUpdate"; nodes: DagNodeType[]; derived: DagDerivedType }
+  | { type: "dagUpdate"; nodes: DagNodeType[]; derived: DagDerivedType; addedHolidays?: string[]; removedHolidays?: string[] }
   | { type: "loading"; loading: boolean }
   | { type: "error"; message: string };

@@ -1,5 +1,5 @@
 import holiday_jp from "@holiday-jp/holiday_jp";
-import type { DagNode as DagNodeType, DagDerived as DagDerivedType, NodeStatus as NodeStatusType } from "../schema/dag.js";
+import type { DagNode as DagNodeType, DagDerived as DagDerivedType, NodeStatus as NodeStatusType, CalendarConfig as CalendarConfigType } from "../schema/dag.js";
 
 function getRemainingMd(node: DagNodeType): number {
   switch (node.status as NodeStatusType) {
@@ -15,7 +15,7 @@ function getRemainingMd(node: DagNodeType): number {
   }
 }
 
-export function computeCriticalPath(nodes: DagNodeType[]): DagDerivedType {
+export function computeCriticalPath(nodes: DagNodeType[], calendar?: CalendarConfigType): DagDerivedType {
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const dist = new Map<string, number>();
   const prev = new Map<string, string | null>();
@@ -94,10 +94,18 @@ export function computeCriticalPath(nodes: DagNodeType[]): DagDerivedType {
 
   return {
     criticalPath,
-    estimatedCompletionDate: computeCompletionDate(remainingMd),
+    estimatedCompletionDate: computeCompletionDate(remainingMd, calendar),
     totalEstimateMd,
     remainingMd,
   };
+}
+
+export function getJpHolidays(year: number): Array<{ date: string; name: string }> {
+  const holidays = holiday_jp.between(new Date(`${year}-01-01`), new Date(`${year}-12-31`));
+  return holidays.map((h: { date: Date; name: string }) => ({
+    date: h.date.toISOString().split("T")[0],
+    name: h.name,
+  }));
 }
 
 function getJpHolidayDates(year: number): Set<string> {
@@ -105,7 +113,17 @@ function getJpHolidayDates(year: number): Set<string> {
   return new Set(holidays.map((h: { date: Date }) => h.date.toISOString().split("T")[0]));
 }
 
-function isWorkingDay(date: Date, holidayCache: Map<number, Set<string>>): boolean {
+function isWorkingDay(
+  date: Date,
+  holidayCache: Map<number, Set<string>>,
+  addedHolidays: Set<string>,
+  removedHolidays: Set<string>,
+): boolean {
+  const dateStr = date.toISOString().split("T")[0];
+
+  if (removedHolidays.has(dateStr)) return true;
+  if (addedHolidays.has(dateStr)) return false;
+
   const day = date.getDay();
   if (day === 0 || day === 6) return false;
 
@@ -113,20 +131,21 @@ function isWorkingDay(date: Date, holidayCache: Map<number, Set<string>>): boole
   if (!holidayCache.has(year)) {
     holidayCache.set(year, getJpHolidayDates(year));
   }
-  const dateStr = date.toISOString().split("T")[0];
   return !holidayCache.get(year)!.has(dateStr);
 }
 
-function computeCompletionDate(remainingMd: number): string {
+function computeCompletionDate(remainingMd: number, calendar?: CalendarConfigType): string {
   if (remainingMd <= 0) return new Date().toISOString().split("T")[0];
 
   let daysNeeded = Math.ceil(remainingMd);
   const date = new Date();
   const holidayCache = new Map<number, Set<string>>();
+  const addedHolidays = new Set(calendar?.addedHolidays ?? []);
+  const removedHolidays = new Set(calendar?.removedHolidays ?? []);
 
   while (daysNeeded > 0) {
     date.setDate(date.getDate() + 1);
-    if (isWorkingDay(date, holidayCache)) {
+    if (isWorkingDay(date, holidayCache, addedHolidays, removedHolidays)) {
       daysNeeded--;
     }
   }

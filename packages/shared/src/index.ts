@@ -5,6 +5,7 @@ export {
   NodeCategory,
   DagNode,
   DagDerived,
+  CalendarConfig,
   MichinoriFile,
 } from "./schema/dag.js";
 export type {
@@ -12,6 +13,7 @@ export type {
   NodeCategory as NodeCategoryType,
   DagNode as DagNodeType,
   DagDerived as DagDerivedType,
+  CalendarConfig as CalendarConfigType,
   MichinoriFile as MichinoriFileType,
 } from "./schema/dag.js";
 
@@ -26,7 +28,7 @@ export type {
   ErrorResponse as ErrorResponseType,
 } from "./schema/api.js";
 
-export { computeCriticalPath } from "./utils/criticalPath.js";
+export { computeCriticalPath, getJpHolidays } from "./utils/criticalPath.js";
 
 export type {
   ExtensionToWebview,

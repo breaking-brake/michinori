@@ -49,6 +49,12 @@ export const DagDerived = z.object({
 });
 export type DagDerived = z.infer<typeof DagDerived>;
 
+export const CalendarConfig = z.object({
+  addedHolidays: z.array(z.string()).default([]),
+  removedHolidays: z.array(z.string()).default([]),
+});
+export type CalendarConfig = z.infer<typeof CalendarConfig>;
+
 export const MichinoriFile = z.object({
   version: z.literal(1),
   metadata: z.object({
@@ -60,5 +66,6 @@ export const MichinoriFile = z.object({
   }),
   nodes: z.array(DagNode).min(1),
   derived: DagDerived,
+  calendar: CalendarConfig.default({}),
 });
 export type MichinoriFile = z.infer<typeof MichinoriFile>;

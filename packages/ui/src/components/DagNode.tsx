@@ -53,8 +53,8 @@ export const DagNode = memo(({ data }: NodeProps) => {
       }}
     >
       <Handle type="target" position={Position.Top} />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-        <span style={{ fontWeight: 600 }}>{d.label}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 6 }}>
+        <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>{d.label}</span>
         <span
           style={{
             fontSize: 10,
@@ -63,6 +63,8 @@ export const DagNode = memo(({ data }: NodeProps) => {
             background: CATEGORY_COLORS[d.category] ?? "#6b7280",
             color: "#fff",
             opacity: 0.9,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
           }}
         >
           {d.category}

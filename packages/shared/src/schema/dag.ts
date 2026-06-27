@@ -3,7 +3,7 @@ import { z } from "zod";
 export const NodeStatus = z.enum(["未着手", "進行中", "PR Open", "完了"]);
 export type NodeStatus = z.infer<typeof NodeStatus>;
 
-export const NodeCategory = z.enum(["実装", "調査", "設計", "その他"]);
+export const NodeCategory = z.enum(["実装", "調査", "設計", "テスト", "その他"]);
 export type NodeCategory = z.infer<typeof NodeCategory>;
 
 export const DagNode = z.object({

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 
 type Status = "未着手" | "進行中" | "PR Open" | "完了";
-type Category = "実装" | "調査" | "設計" | "その他";
+type Category = "実装" | "調査" | "設計" | "テスト" | "その他";
 const STATUSES: Status[] = ["未着手", "進行中", "PR Open", "完了"];
-const CATEGORIES: Category[] = ["実装", "調査", "設計", "その他"];
+const CATEGORIES: Category[] = ["実装", "調査", "設計", "テスト", "その他"];
 
 const inputStyle = {
   padding: "6px 10px",

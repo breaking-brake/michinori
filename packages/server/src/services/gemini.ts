@@ -17,7 +17,7 @@ const responseSchema = {
           label: { type: Type.STRING },
           description: { type: Type.STRING },
           estimateMd: { type: Type.NUMBER },
-          category: { type: Type.STRING, enum: ["実装", "調査", "設計", "その他"] },
+          category: { type: Type.STRING, enum: ["実装", "調査", "設計", "テスト", "その他"] },
           status: { type: Type.STRING, enum: ["未着手", "進行中", "PR Open", "完了"] },
           dependencies: { type: Type.ARRAY, items: { type: Type.STRING } },
         },

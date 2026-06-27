@@ -260,7 +260,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           <Background />
           <Controls />
           {hasDag && (
-            <Panel position="top-right">
+            <Panel position="top-left">
               <button
                 onClick={handleAddNode}
                 style={{

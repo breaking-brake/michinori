@@ -23,7 +23,9 @@ import { ChatPanel } from "./components/ChatPanel";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { NodeDetailPanel } from "./components/NodeDetailPanel";
 import { CalendarPanel } from "./components/CalendarPanel";
+import { ProposalPreviewDialog } from "./components/ProposalPreviewDialog";
 import type { DagAdapter, DagMessage, ChatMessage } from "./types";
+import type { DagProposalType } from "@michinori/shared";
 import type { DagNodeType, DagDerivedType } from "@michinori/shared";
 
 const nodeTypes = { dag: DagNode };
@@ -105,6 +107,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [pendingProposal, setPendingProposal] = useState<DagProposalType | null>(null);
   const reactFlow = useReactFlow();
 
   const selectedDagNode = selectedNodeId ? dagNodes.find((n) => n.id === selectedNodeId) : null;
@@ -284,7 +287,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
             messages={chatMessages}
             loading={chatLoading}
             onSendMessage={(msg) => adapter.sendChat(msg)}
-            onApplyProposal={(proposal) => adapter.applyProposal(proposal)}
+            onApplyProposal={(proposal) => setPendingProposal(proposal)}
             onClose={() => setChatOpen(false)}
           />
         )}
@@ -314,6 +317,18 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         )}
         {loading && <LoadingOverlay />}
       </div>
+      {pendingProposal && (
+        <ProposalPreviewDialog
+          currentNodes={dagNodes}
+          proposal={pendingProposal}
+          calendarConfig={{ preset: calendarPreset as "weekday" | "weekend", customDayOff, customDayOn }}
+          onConfirm={() => {
+            adapter.applyProposal(pendingProposal);
+            setPendingProposal(null);
+          }}
+          onCancel={() => setPendingProposal(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import holiday_jp from "@holiday-jp/holiday_jp";
 import type { DagNode as DagNodeType, DagDerived as DagDerivedType, NodeStatus as NodeStatusType } from "../schema/dag.js";
 
 function getRemainingMd(node: DagNodeType): number {
@@ -99,16 +100,33 @@ export function computeCriticalPath(nodes: DagNodeType[]): DagDerivedType {
   };
 }
 
+function getJpHolidayDates(year: number): Set<string> {
+  const holidays = holiday_jp.between(new Date(`${year}-01-01`), new Date(`${year}-12-31`));
+  return new Set(holidays.map((h: { date: Date }) => h.date.toISOString().split("T")[0]));
+}
+
+function isWorkingDay(date: Date, holidayCache: Map<number, Set<string>>): boolean {
+  const day = date.getDay();
+  if (day === 0 || day === 6) return false;
+
+  const year = date.getFullYear();
+  if (!holidayCache.has(year)) {
+    holidayCache.set(year, getJpHolidayDates(year));
+  }
+  const dateStr = date.toISOString().split("T")[0];
+  return !holidayCache.get(year)!.has(dateStr);
+}
+
 function computeCompletionDate(remainingMd: number): string {
   if (remainingMd <= 0) return new Date().toISOString().split("T")[0];
 
   let daysNeeded = Math.ceil(remainingMd);
   const date = new Date();
+  const holidayCache = new Map<number, Set<string>>();
 
   while (daysNeeded > 0) {
     date.setDate(date.getDate() + 1);
-    const day = date.getDay();
-    if (day !== 0 && day !== 6) {
+    if (isWorkingDay(date, holidayCache)) {
       daysNeeded--;
     }
   }

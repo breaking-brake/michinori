@@ -28,6 +28,7 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   proposal?: DagProposalType;
+  dismissed?: boolean;
 }
 
 export type DagMessage =

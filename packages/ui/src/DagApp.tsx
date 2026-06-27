@@ -46,6 +46,7 @@ interface DagAppProps {
   customDayOn?: string[];
   chatMessages?: ChatMessage[];
   chatLoading?: boolean;
+  onDismissProposal?: () => void;
 }
 
 function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }> {
@@ -101,7 +102,7 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false }: DagAppProps) {
+function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false, onDismissProposal }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -288,6 +289,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
             loading={chatLoading}
             onSendMessage={(msg) => adapter.sendChat(msg)}
             onApplyProposal={(proposal) => setPendingProposal(proposal)}
+            onDismissProposal={() => onDismissProposal?.()}
             onClose={() => setChatOpen(false)}
           />
         )}
@@ -324,6 +326,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           calendarConfig={{ preset: calendarPreset as "weekday" | "weekend", customDayOff, customDayOn }}
           onConfirm={() => {
             adapter.applyProposal(pendingProposal);
+            onDismissProposal?.();
             setPendingProposal(null);
           }}
           onCancel={() => setPendingProposal(null)}

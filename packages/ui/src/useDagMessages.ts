@@ -74,7 +74,16 @@ export function useDagMessages() {
     }));
   }, []);
 
+  const dismissProposal = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      chatMessages: prev.chatMessages.map((msg) =>
+        msg.proposal && !msg.dismissed ? { ...msg, dismissed: true } : msg,
+      ),
+    }));
+  }, []);
+
   const reset = useCallback(() => setState(INITIAL_STATE), []);
 
-  return { state, dispatch, addUserChatMessage, reset };
+  return { state, dispatch, addUserChatMessage, dismissProposal, reset };
 }

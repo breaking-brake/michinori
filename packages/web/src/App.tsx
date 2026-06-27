@@ -3,7 +3,7 @@ import { DagApp, useDagMessages } from "@michinori/ui";
 import { createWebAdapter } from "./webAdapter";
 
 export default function App() {
-  const { state, dispatch, addUserChatMessage } = useDagMessages();
+  const { state, dispatch, addUserChatMessage, dismissProposal } = useDagMessages();
   const getChatMessages = useCallback(() => state.chatMessages, [state.chatMessages]);
   const adapter = useMemo(
     () => createWebAdapter(dispatch, addUserChatMessage, getChatMessages),
@@ -26,6 +26,7 @@ export default function App() {
       customDayOn={state.customDayOn}
       chatMessages={state.chatMessages}
       chatLoading={state.chatLoading}
+      onDismissProposal={dismissProposal}
     />
   );
 }

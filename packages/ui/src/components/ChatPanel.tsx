@@ -7,22 +7,26 @@ interface ChatPanelProps {
   loading: boolean;
   onSendMessage: (message: string) => void;
   onApplyProposal: (proposal: DagProposalType) => void;
+  onDismissProposal: () => void;
   onClose: () => void;
 }
 
-function ProposalBlock({ proposal, onApply }: { proposal: DagProposalType; onApply: () => void }) {
+function ProposalBlock({ proposal, dismissed }: { proposal: DagProposalType; dismissed: boolean }) {
   return (
     <div
       style={{
         margin: "8px 0",
         padding: 10,
         borderRadius: 6,
-        border: "1px solid #3b82f6",
-        background: "rgba(59,130,246,0.1)",
+        border: `1px solid ${dismissed ? "#555" : "#3b82f6"}`,
+        background: dismissed ? "rgba(100,100,100,0.1)" : "rgba(59,130,246,0.1)",
         fontSize: 12,
+        opacity: dismissed ? 0.5 : 1,
       }}
     >
-      <div style={{ fontWeight: 600, marginBottom: 6, color: "#93c5fd" }}>DAG変更提案</div>
+      <div style={{ fontWeight: 600, marginBottom: 6, color: dismissed ? "#888" : "#93c5fd" }}>
+        DAG変更提案{dismissed ? "（見送り）" : ""}
+      </div>
       <div style={{ opacity: 0.8, marginBottom: 8 }}>{proposal.reasoning}</div>
       {proposal.additions.length > 0 && (
         <div style={{ marginBottom: 4 }}>
@@ -42,29 +46,22 @@ function ProposalBlock({ proposal, onApply }: { proposal: DagProposalType; onApp
           {proposal.modifications.map((m) => m.nodeId).join(", ")}
         </div>
       )}
-      <button
-        onClick={onApply}
-        style={{
-          marginTop: 6,
-          padding: "6px 16px",
-          background: "#3b82f6",
-          color: "#fff",
-          border: "none",
-          borderRadius: 4,
-          cursor: "pointer",
-          fontSize: 12,
-          width: "100%",
-        }}
-      >
-        DAGに反映
-      </button>
     </div>
   );
 }
 
-export function ChatPanel({ messages, loading, onSendMessage, onApplyProposal, onClose }: ChatPanelProps) {
+export function ChatPanel({ messages, loading, onSendMessage, onApplyProposal, onDismissProposal, onClose }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const pendingProposal = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.proposal && !msg.dismissed) return msg.proposal;
+      if (msg.proposal && msg.dismissed) return null;
+    }
+    return null;
+  })();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -175,7 +172,7 @@ export function ChatPanel({ messages, loading, onSendMessage, onApplyProposal, o
             {msg.proposal && (
               <ProposalBlock
                 proposal={msg.proposal}
-                onApply={() => onApplyProposal(msg.proposal!)}
+                dismissed={!!msg.dismissed}
               />
             )}
           </div>
@@ -193,41 +190,79 @@ export function ChatPanel({ messages, loading, onSendMessage, onApplyProposal, o
           gap: 8,
         }}
       >
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="メッセージを入力..."
-          rows={2}
-          disabled={loading}
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            background: "var(--vscode-input-background, #3c3c3c)",
-            color: "var(--vscode-input-foreground, #ccc)",
-            border: "1px solid var(--vscode-input-border, #555)",
-            borderRadius: 4,
-            fontSize: 13,
-            resize: "none",
-          }}
-        />
-        <button
-          onClick={handleSend}
-          disabled={loading || !input.trim()}
-          style={{
-            padding: "6px 12px",
-            background: "var(--vscode-button-background, #0e639c)",
-            color: "var(--vscode-button-foreground, #fff)",
-            border: "none",
-            borderRadius: 4,
-            cursor: loading ? "wait" : "pointer",
-            fontSize: 13,
-            opacity: loading || !input.trim() ? 0.5 : 1,
-            alignSelf: "flex-end",
-          }}
-        >
-          送信
-        </button>
+        {pendingProposal ? (
+          <>
+            <button
+              onClick={() => onApplyProposal(pendingProposal)}
+              style={{
+                flex: 1,
+                padding: "10px 16px",
+                background: "#3b82f6",
+                color: "#fff",
+                border: "none",
+                borderRadius: 4,
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              DAGに反映
+            </button>
+            <button
+              onClick={onDismissProposal}
+              style={{
+                flex: 1,
+                padding: "10px 16px",
+                background: "transparent",
+                color: "var(--vscode-foreground, #ccc)",
+                border: "1px solid var(--vscode-panel-border, #444)",
+                borderRadius: 4,
+                cursor: "pointer",
+                fontSize: 13,
+              }}
+            >
+              キャンセル
+            </button>
+          </>
+        ) : (
+          <>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="メッセージを入力..."
+              rows={2}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: "6px 10px",
+                background: "var(--vscode-input-background, #3c3c3c)",
+                color: "var(--vscode-input-foreground, #ccc)",
+                border: "1px solid var(--vscode-input-border, #555)",
+                borderRadius: 4,
+                fontSize: 13,
+                resize: "none",
+              }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={loading || !input.trim()}
+              style={{
+                padding: "6px 12px",
+                background: "var(--vscode-button-background, #0e639c)",
+                color: "var(--vscode-button-foreground, #fff)",
+                border: "none",
+                borderRadius: 4,
+                cursor: loading ? "wait" : "pointer",
+                fontSize: 13,
+                opacity: loading || !input.trim() ? 0.5 : 1,
+                alignSelf: "flex-end",
+              }}
+            >
+              送信
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

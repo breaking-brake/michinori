@@ -39,14 +39,14 @@ export function Header({ completionDate, remainingMd, onReset, onSave, onLoad, o
             完了予定: <strong>{completionDate}</strong>
           </span>
           <span style={{ opacity: 0.6 }}>残り {remainingMd}MD</span>
+          {onCalendar && (
+            <button onClick={onCalendar} style={headerBtnStyle}>稼働日設定</button>
+          )}
         </>
       ) : (
         <span style={{ opacity: 0.6 }}>DAGを生成してください</span>
       )}
       <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-        {onCalendar && (
-          <button onClick={onCalendar} style={headerBtnStyle}>カレンダー</button>
-        )}
         {onLoad && (
           <button onClick={onLoad} style={headerBtnStyle}>読込</button>
         )}

@@ -236,7 +236,7 @@ export function ProposalPreviewDialog({ currentNodes, proposal, calendarConfig, 
                 fontSize: 13,
               }}
             >
-              キャンセル
+              閉じる
             </button>
             <button
               onClick={onConfirm}
@@ -250,7 +250,7 @@ export function ProposalPreviewDialog({ currentNodes, proposal, calendarConfig, 
                 fontSize: 13,
               }}
             >
-              DAGに反映
+              確定
             </button>
           </div>
         </div>

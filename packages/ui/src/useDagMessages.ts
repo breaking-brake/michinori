@@ -77,6 +77,7 @@ export function useDagMessages() {
   const dismissProposal = useCallback(() => {
     setState((prev) => ({
       ...prev,
+      chatLoading: false,
       chatMessages: prev.chatMessages.map((msg) =>
         msg.proposal && !msg.dismissed ? { ...msg, dismissed: true } : msg,
       ),

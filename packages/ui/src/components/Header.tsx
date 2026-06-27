@@ -16,9 +16,10 @@ interface HeaderProps {
   onSave?: () => void;
   onLoad?: () => void;
   onCalendar?: () => void;
+  onChat?: () => void;
 }
 
-export function Header({ completionDate, remainingMd, onReset, onSave, onLoad, onCalendar }: HeaderProps) {
+export function Header({ completionDate, remainingMd, onReset, onSave, onLoad, onCalendar, onChat }: HeaderProps) {
   return (
     <div
       style={{
@@ -47,6 +48,9 @@ export function Header({ completionDate, remainingMd, onReset, onSave, onLoad, o
         <span style={{ opacity: 0.6 }}>DAGを生成してください</span>
       )}
       <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+        {onChat && (
+          <button onClick={onChat} style={{ ...headerBtnStyle, background: "var(--vscode-button-background, #0e639c)", color: "#fff", opacity: 1 }}>AI相談</button>
+        )}
         {onLoad && (
           <button onClick={onLoad} style={headerBtnStyle}>読込</button>
         )}

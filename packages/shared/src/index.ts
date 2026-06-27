@@ -21,11 +21,17 @@ export type {
 export {
   AnalyzeRequest,
   AnalyzeResponse,
+  ChatRequest,
+  ChatResponse,
+  DagProposal,
   ErrorResponse,
 } from "./schema/api.js";
 export type {
   AnalyzeRequest as AnalyzeRequestType,
   AnalyzeResponse as AnalyzeResponseType,
+  ChatRequest as ChatRequestType,
+  ChatResponse as ChatResponseType,
+  DagProposal as DagProposalType,
   ErrorResponse as ErrorResponseType,
 } from "./schema/api.js";
 

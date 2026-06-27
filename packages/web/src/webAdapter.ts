@@ -1,5 +1,5 @@
-import type { DagAdapter, DagMessage } from "@michinori/ui";
-import type { DagNodeType, MichinoriFileType } from "@michinori/shared";
+import type { DagAdapter, DagMessage, ChatMessage } from "@michinori/ui";
+import type { DagNodeType, DagProposalType, MichinoriFileType } from "@michinori/shared";
 import { computeCriticalPath } from "@michinori/shared";
 
 const DAG_STORAGE = "michinori:dag";
@@ -23,7 +23,11 @@ function saveDag(dag: MichinoriFileType) {
   localStorage.setItem(DAG_STORAGE, JSON.stringify(dag));
 }
 
-export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapter {
+export function createWebAdapter(
+  dispatch: (msg: DagMessage) => void,
+  addUserChatMessage: (content: string) => void,
+  getChatMessages: () => ChatMessage[],
+): DagAdapter {
   async function callAnalyze(
     repoUrl: string,
     prompt: string,
@@ -223,6 +227,67 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
         }
       };
       input.click();
+    },
+    sendChat: async (message) => {
+      const dag = getDag();
+      if (!dag) {
+        dispatch({ type: "error", message: "先にDAGを生成してください" });
+        return;
+      }
+      addUserChatMessage(message);
+      dispatch({ type: "chatLoading", loading: true });
+      try {
+        const chatHistory = getChatMessages().map((m) => ({
+          role: m.role === "user" ? "user" as const : "model" as const,
+          content: m.content,
+        }));
+        const endpoint = getEndpoint();
+        const res = await fetch(`${endpoint}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, conversationHistory: chatHistory, currentDag: dag }),
+        });
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error: string };
+          throw new Error(body.error ?? `HTTP ${res.status}`);
+        }
+        const data = (await res.json()) as { message: string; proposal?: DagProposalType };
+        dispatch({ type: "chatResponse", message: data.message, proposal: data.proposal ?? undefined });
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        dispatch({ type: "chatResponse", message: `エラー: ${errMsg}` });
+      }
+    },
+    applyProposal: (proposal) => {
+      const dag = getDag();
+      if (!dag) return;
+
+      for (const removal of proposal.removals) {
+        dag.nodes = dag.nodes.filter((n) => n.id !== removal);
+        for (const node of dag.nodes) {
+          node.dependencies = node.dependencies.filter((d) => d !== removal);
+        }
+      }
+
+      for (const mod of proposal.modifications) {
+        const node = dag.nodes.find((n) => n.id === mod.nodeId);
+        if (node) {
+          if (mod.changes.label !== undefined) (node as { label: string }).label = mod.changes.label;
+          if (mod.changes.description !== undefined) (node as { description: string }).description = mod.changes.description;
+          if (mod.changes.estimateMd !== undefined) (node as { estimateMd: number }).estimateMd = mod.changes.estimateMd;
+          if (mod.changes.category !== undefined) (node as { category: string }).category = mod.changes.category;
+          if (mod.changes.status !== undefined) (node as { status: string }).status = mod.changes.status;
+        }
+      }
+
+      for (const addition of proposal.additions) {
+        dag.nodes.push(addition);
+      }
+
+      dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+      dag.metadata.updatedAt = new Date().toISOString();
+      saveDag(dag);
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
     },
     reset: () => {
       localStorage.removeItem(DAG_STORAGE);

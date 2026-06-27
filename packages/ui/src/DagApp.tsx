@@ -19,11 +19,11 @@ import { DagNode } from "./components/DagNode";
 import { DeletableEdge } from "./components/DeletableEdge";
 import { Header } from "./components/Header";
 import { InputPanel } from "./components/InputPanel";
-import { ModifyPanel } from "./components/ModifyPanel";
+import { ChatPanel } from "./components/ChatPanel";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { NodeDetailPanel } from "./components/NodeDetailPanel";
 import { CalendarPanel } from "./components/CalendarPanel";
-import type { DagAdapter, DagMessage } from "./types";
+import type { DagAdapter, DagMessage, ChatMessage } from "./types";
 import type { DagNodeType, DagDerivedType } from "@michinori/shared";
 
 const nodeTypes = { dag: DagNode };
@@ -42,6 +42,8 @@ interface DagAppProps {
   calendarPreset?: string;
   customDayOff?: string[];
   customDayOn?: string[];
+  chatMessages?: ChatMessage[];
+  chatLoading?: boolean;
 }
 
 function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }> {
@@ -97,11 +99,12 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [] }: DagAppProps) {
+function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const reactFlow = useReactFlow();
 
   const selectedDagNode = selectedNodeId ? dagNodes.find((n) => n.id === selectedNodeId) : null;
@@ -182,6 +185,8 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       setSelectedNodeId(node.id);
+      setChatOpen(false);
+      setCalendarOpen(false);
     },
     [],
   );
@@ -209,17 +214,13 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
     [adapter],
   );
 
-  const handleModify = useCallback(
-    (prompt: string) => adapter.modify(prompt),
-    [adapter],
-  );
-
   return (
     <div style={{ width: "100vw", height: "100vh", display: "flex", flexDirection: "column" }}>
       <Header
         completionDate={derived?.estimatedCompletionDate ?? null}
         remainingMd={derived?.remainingMd ?? 0}
-        onCalendar={() => { setCalendarOpen(!calendarOpen); setSelectedNodeId(null); }}
+        onCalendar={() => { setCalendarOpen(!calendarOpen); setSelectedNodeId(null); setChatOpen(false); }}
+        onChat={hasDag ? () => { setChatOpen(!chatOpen); setSelectedNodeId(null); setCalendarOpen(false); } : undefined}
         onSave={() => adapter.save()}
         onLoad={() => adapter.load()}
         onReset={() => {
@@ -278,7 +279,15 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
             </Panel>
           )}
         </ReactFlow>
-        {hasDag && <ModifyPanel onSubmit={handleModify} loading={loading} />}
+        {chatOpen && (
+          <ChatPanel
+            messages={chatMessages}
+            loading={chatLoading}
+            onSendMessage={(msg) => adapter.sendChat(msg)}
+            onApplyProposal={(proposal) => adapter.applyProposal(proposal)}
+            onClose={() => setChatOpen(false)}
+          />
+        )}
         {selectedDagNode && (
           <NodeDetailPanel
             nodeId={selectedDagNode.id}

@@ -6,6 +6,7 @@ import { logger } from "./utils/logger.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { geoBlock } from "./middleware/geoBlock.js";
 import { analyze } from "./routes/analyze.js";
+import { chat } from "./routes/chat.js";
 
 const app = new Hono();
 
@@ -23,6 +24,7 @@ app.get("/", (c) =>
 
 app.use("/analyze/*", rateLimit({ perIp: env.RATE_LIMIT_PER_IP, global: env.RATE_LIMIT_GLOBAL }));
 app.route("/analyze", analyze);
+app.route("/chat", chat);
 
 logger.info("server:start", { port: env.PORT });
 

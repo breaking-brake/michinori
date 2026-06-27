@@ -1,8 +1,10 @@
-import type { DagNodeType, DagDerivedType } from "@michinori/shared";
+import type { DagNodeType, DagDerivedType, DagProposalType } from "@michinori/shared";
 
 export interface DagAdapter {
   generate(repoUrl: string, prompt: string): void;
   modify(prompt: string): void;
+  sendChat(message: string): void;
+  applyProposal(proposal: DagProposalType): void;
   changeStatus(nodeId: string, status: string): void;
   changePosition(nodeId: string, x: number, y: number): void;
   updateNode(nodeId: string, fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number }): void;
@@ -22,7 +24,15 @@ export interface DagUpdate {
   derived: DagDerivedType;
 }
 
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  proposal?: DagProposalType;
+}
+
 export type DagMessage =
   | { type: "dagUpdate"; nodes: DagNodeType[]; derived: DagDerivedType; calendar?: { preset: string; customDayOff: string[]; customDayOn: string[] } }
   | { type: "loading"; loading: boolean }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string }
+  | { type: "chatResponse"; message: string; proposal?: DagProposalType }
+  | { type: "chatLoading"; loading: boolean };

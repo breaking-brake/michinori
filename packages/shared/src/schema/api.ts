@@ -14,6 +14,45 @@ export const AnalyzeResponse = z.object({
 });
 export type AnalyzeResponse = z.infer<typeof AnalyzeResponse>;
 
+// --- Chat API ---
+
+const ChatMessageRole = z.enum(["user", "model"]);
+
+export const DagProposal = z.object({
+  reasoning: z.string(),
+  additions: z.array(DagNode).default([]),
+  removals: z.array(z.string()).default([]),
+  modifications: z.array(z.object({
+    nodeId: z.string(),
+    changes: z.object({
+      label: z.string().optional(),
+      description: z.string().optional(),
+      estimateMd: z.number().optional(),
+      category: z.string().optional(),
+      status: z.string().optional(),
+    }),
+  })).default([]),
+});
+export type DagProposal = z.infer<typeof DagProposal>;
+
+export const ChatRequest = z.object({
+  message: z.string().min(1).max(2000),
+  conversationHistory: z.array(z.object({
+    role: ChatMessageRole,
+    content: z.string(),
+  })).default([]),
+  currentDag: MichinoriFile,
+});
+export type ChatRequest = z.infer<typeof ChatRequest>;
+
+export const ChatResponse = z.object({
+  message: z.string(),
+  proposal: DagProposal.nullable().default(null),
+});
+export type ChatResponse = z.infer<typeof ChatResponse>;
+
+// --- Error ---
+
 export const ErrorResponse = z.object({
   error: z.string(),
   code: z.enum([

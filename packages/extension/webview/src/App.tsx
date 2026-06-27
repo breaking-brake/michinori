@@ -27,7 +27,7 @@ export default function App() {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       const msg = event.data as DagMessage;
-      if (msg.type === "dagUpdate" || msg.type === "loading" || msg.type === "error") {
+      if (msg.type === "dagUpdate" || msg.type === "loading" || msg.type === "error" || msg.type === "chatResponse" || msg.type === "chatLoading") {
         dispatch(msg);
       }
     };
@@ -41,6 +41,10 @@ export default function App() {
         vscode?.postMessage({ type: "generate", repoUrl, prompt }),
       modify: (prompt) =>
         vscode?.postMessage({ type: "modify", prompt }),
+      sendChat: (message) =>
+        vscode?.postMessage({ type: "sendChat", message }),
+      applyProposal: (proposal) =>
+        vscode?.postMessage({ type: "applyProposal", proposal }),
       changeStatus: (nodeId, status) =>
         vscode?.postMessage({ type: "statusChange", nodeId, status }),
       updateNode: (nodeId, fields) =>
@@ -82,6 +86,8 @@ export default function App() {
       calendarPreset={state.calendarPreset}
       customDayOff={state.customDayOff}
       customDayOn={state.customDayOn}
+      chatMessages={state.chatMessages}
+      chatLoading={state.chatLoading}
     />
   );
 }

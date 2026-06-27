@@ -1,10 +1,14 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { DagApp, useDagMessages } from "@michinori/ui";
 import { createWebAdapter } from "./webAdapter";
 
 export default function App() {
-  const { state, dispatch } = useDagMessages();
-  const adapter = useMemo(() => createWebAdapter(dispatch), [dispatch]);
+  const { state, dispatch, addUserChatMessage } = useDagMessages();
+  const getChatMessages = useCallback(() => state.chatMessages, [state.chatMessages]);
+  const adapter = useMemo(
+    () => createWebAdapter(dispatch, addUserChatMessage, getChatMessages),
+    [dispatch, addUserChatMessage, getChatMessages],
+  );
 
   return (
     <DagApp
@@ -20,6 +24,8 @@ export default function App() {
       calendarPreset={state.calendarPreset}
       customDayOff={state.customDayOff}
       customDayOn={state.customDayOn}
+      chatMessages={state.chatMessages}
+      chatLoading={state.chatLoading}
     />
   );
 }

@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
-import type { DagMessage } from "./types";
+import { useCallback, useState } from "react";
+import type { DagMessage, ChatMessage } from "./types";
 import type { DagNodeType, DagDerivedType } from "@michinori/shared";
 
 export interface DagState {
@@ -11,6 +11,8 @@ export interface DagState {
   calendarPreset: string;
   customDayOff: string[];
   customDayOn: string[];
+  chatMessages: ChatMessage[];
+  chatLoading: boolean;
 }
 
 const INITIAL_STATE: DagState = {
@@ -22,6 +24,8 @@ const INITIAL_STATE: DagState = {
   calendarPreset: "weekday",
   customDayOff: [],
   customDayOn: [],
+  chatMessages: [],
+  chatLoading: false,
 };
 
 export function useDagMessages() {
@@ -47,10 +51,30 @@ export function useDagMessages() {
       case "error":
         setState((prev) => ({ ...prev, error: msg.message }));
         break;
+      case "chatResponse":
+        setState((prev) => ({
+          ...prev,
+          chatMessages: [
+            ...prev.chatMessages,
+            { role: "assistant" as const, content: msg.message, proposal: msg.proposal ?? undefined },
+          ],
+          chatLoading: false,
+        }));
+        break;
+      case "chatLoading":
+        setState((prev) => ({ ...prev, chatLoading: msg.loading }));
+        break;
     }
+  }, []);
+
+  const addUserChatMessage = useCallback((content: string) => {
+    setState((prev) => ({
+      ...prev,
+      chatMessages: [...prev.chatMessages, { role: "user" as const, content }],
+    }));
   }, []);
 
   const reset = useCallback(() => setState(INITIAL_STATE), []);
 
-  return { state, dispatch, reset };
+  return { state, dispatch, addUserChatMessage, reset };
 }

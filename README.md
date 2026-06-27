@@ -55,6 +55,13 @@ pnpm --filter michinori-webview build
 # F5 で Extension Development Host 起動
 ```
 
+## 将来構想
+
+- VSCode拡張機能でのローカルワークスペース対応
+- コミットやPRのアクティビティからステータスを自動更新
+- [CC Workflow Studio](https://github.com/breaking-brake/cc-wf-studio)との連携により、計画から実装までの一貫した開発体験
+- etc.
+
 ## ライセンス
 
 AGPL-3.0-only

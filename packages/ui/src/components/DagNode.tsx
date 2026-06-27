@@ -1,29 +1,15 @@
 import { memo, useState } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { STATUS_DEFINITIONS, CATEGORY_DEFINITIONS } from "@michinori/shared";
 
-type Status = "未着手" | "進行中" | "PR Open" | "完了";
-type Category = "実装" | "調査" | "設計" | "テスト" | "その他";
-
-const STATUS_COLORS: Record<Status, string> = {
-  "未着手": "#6b7280",
-  "進行中": "#3b82f6",
-  "PR Open": "#f59e0b",
-  "完了": "#10b981",
-};
-
-const CATEGORY_COLORS: Record<Category, string> = {
-  "実装": "#8b5cf6",
-  "調査": "#06b6d4",
-  "設計": "#f97316",
-  "テスト": "#ec4899",
-  "その他": "#6b7280",
-};
+const STATUS_COLORS = Object.fromEntries(STATUS_DEFINITIONS.map((s) => [s.value, s.color]));
+const CATEGORY_COLORS = Object.fromEntries(CATEGORY_DEFINITIONS.map((c) => [c.value, c.color]));
 
 interface DagNodeData {
   label: string;
   estimateMd: number;
-  category: Category;
-  status: Status;
+  category: string;
+  status: string;
   description: string;
   onCriticalPath?: boolean;
   [key: string]: unknown;

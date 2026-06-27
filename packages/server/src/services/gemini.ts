@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { DagNode } from "@michinori/shared";
+import { DagNode, CATEGORY_DEFINITIONS, STATUS_DEFINITIONS } from "@michinori/shared";
 import { SYSTEM_PROMPT } from "../prompts/dagPrompt.js";
 import { logger } from "../utils/logger.js";
 
@@ -17,8 +17,8 @@ const responseSchema = {
           label: { type: Type.STRING },
           description: { type: Type.STRING },
           estimateMd: { type: Type.NUMBER },
-          category: { type: Type.STRING, enum: ["実装", "調査", "設計", "テスト", "その他"] },
-          status: { type: Type.STRING, enum: ["未着手", "進行中", "PR Open", "完了"] },
+          category: { type: Type.STRING, enum: CATEGORY_DEFINITIONS.map((c) => c.value) },
+          status: { type: Type.STRING, enum: STATUS_DEFINITIONS.map((s) => s.value) },
           dependencies: { type: Type.ARRAY, items: { type: Type.STRING } },
         },
         required: ["id", "label", "description", "estimateMd", "category", "status", "dependencies"],

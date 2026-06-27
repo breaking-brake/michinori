@@ -1,4 +1,6 @@
 export {
+  STATUS_DEFINITIONS,
+  CATEGORY_DEFINITIONS,
   NodeStatus,
   NodeCategory,
   DagNode,

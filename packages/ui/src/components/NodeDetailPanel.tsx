@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
+import { STATUS_DEFINITIONS, CATEGORY_DEFINITIONS } from "@michinori/shared";
 
-type Status = "未着手" | "進行中" | "PR Open" | "完了";
-type Category = "実装" | "調査" | "設計" | "テスト" | "その他";
-const STATUSES: Status[] = ["未着手", "進行中", "PR Open", "完了"];
-const CATEGORIES: Category[] = ["実装", "調査", "設計", "テスト", "その他"];
+const STATUSES = STATUS_DEFINITIONS.map((s) => s.value);
+const CATEGORIES = CATEGORY_DEFINITIONS.map((c) => c.value);
 
 const inputStyle = {
   padding: "6px 10px",

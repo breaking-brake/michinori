@@ -1,9 +1,27 @@
 import { z } from "zod";
 
-export const NodeStatus = z.enum(["未着手", "進行中", "PR Open", "完了"]);
+export const STATUS_DEFINITIONS = [
+  { value: "未着手", description: "not started", color: "#6b7280" },
+  { value: "進行中", description: "in progress", color: "#3b82f6" },
+  { value: "PR Open", description: "pull request open, awaiting review", color: "#f59e0b" },
+  { value: "完了", description: "done", color: "#10b981" },
+] as const;
+
+export const CATEGORY_DEFINITIONS = [
+  { value: "実装", description: "code changes", color: "#8b5cf6" },
+  { value: "調査", description: "research, PoC, library evaluation", color: "#06b6d4" },
+  { value: "設計", description: "architecture, API design, schema design", color: "#f97316" },
+  { value: "テスト", description: "test writing, QA, E2E testing, manual verification", color: "#ec4899" },
+  { value: "その他", description: "CI setup, docs, env config, approvals", color: "#6b7280" },
+] as const;
+
+const statusValues = STATUS_DEFINITIONS.map((s) => s.value) as [string, ...string[]];
+const categoryValues = CATEGORY_DEFINITIONS.map((c) => c.value) as [string, ...string[]];
+
+export const NodeStatus = z.enum(statusValues);
 export type NodeStatus = z.infer<typeof NodeStatus>;
 
-export const NodeCategory = z.enum(["実装", "調査", "設計", "テスト", "その他"]);
+export const NodeCategory = z.enum(categoryValues);
 export type NodeCategory = z.infer<typeof NodeCategory>;
 
 export const DagNode = z.object({

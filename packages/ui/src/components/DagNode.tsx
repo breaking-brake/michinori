@@ -2,6 +2,7 @@ import { memo, useState } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 type Status = "未着手" | "進行中" | "PR Open" | "完了";
+type Category = "実装" | "調査" | "設計" | "その他";
 
 const STATUS_COLORS: Record<Status, string> = {
   "未着手": "#6b7280",
@@ -10,9 +11,17 @@ const STATUS_COLORS: Record<Status, string> = {
   "完了": "#10b981",
 };
 
+const CATEGORY_COLORS: Record<Category, string> = {
+  "実装": "#8b5cf6",
+  "調査": "#06b6d4",
+  "設計": "#f97316",
+  "その他": "#6b7280",
+};
+
 interface DagNodeData {
   label: string;
   estimateMd: number;
+  category: Category;
   status: Status;
   description: string;
   onCriticalPath?: boolean;
@@ -44,7 +53,21 @@ export const DagNode = memo(({ data }: NodeProps) => {
       }}
     >
       <Handle type="target" position={Position.Top} />
-      <div style={{ fontWeight: 600, marginBottom: 6 }}>{d.label}</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+        <span style={{ fontWeight: 600 }}>{d.label}</span>
+        <span
+          style={{
+            fontSize: 10,
+            padding: "1px 6px",
+            borderRadius: 3,
+            background: CATEGORY_COLORS[d.category] ?? "#6b7280",
+            color: "#fff",
+            opacity: 0.9,
+          }}
+        >
+          {d.category}
+        </span>
+      </div>
       {hovered && d.description && (
         <div style={{ fontSize: 11, opacity: 0.7, marginBottom: 6, lineHeight: 1.4 }}>
           {d.description}

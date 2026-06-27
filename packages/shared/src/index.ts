@@ -1,11 +1,13 @@
 export {
   NodeStatus,
+  NodeCategory,
   DagNode,
   DagDerived,
   MichinoriFile,
 } from "./schema/dag.js";
 export type {
   NodeStatus as NodeStatusType,
+  NodeCategory as NodeCategoryType,
   DagNode as DagNodeType,
   DagDerived as DagDerivedType,
   MichinoriFile as MichinoriFileType,

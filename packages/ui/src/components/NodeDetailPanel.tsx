@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 
 type Status = "未着手" | "進行中" | "PR Open" | "完了";
+type Category = "実装" | "調査" | "設計" | "その他";
 const STATUSES: Status[] = ["未着手", "進行中", "PR Open", "完了"];
+const CATEGORIES: Category[] = ["実装", "調査", "設計", "その他"];
 
 const inputStyle = {
   padding: "6px 10px",
@@ -25,28 +27,32 @@ interface NodeDetailPanelProps {
   label: string;
   status: string;
   description: string;
+  category: string;
   estimateMd: number;
-  onUpdate: (fields: { label?: string; status?: string; description?: string; estimateMd?: number }) => void;
+  onUpdate: (fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number }) => void;
   onClose: () => void;
 }
 
-export function NodeDetailPanel({ nodeId, label, status, description, estimateMd, onUpdate, onClose }: NodeDetailPanelProps) {
+export function NodeDetailPanel({ nodeId, label, status, category, description, estimateMd, onUpdate, onClose }: NodeDetailPanelProps) {
   const [editLabel, setEditLabel] = useState(label);
   const [editStatus, setEditStatus] = useState(status);
+  const [editCategory, setEditCategory] = useState(category);
   const [editDescription, setEditDescription] = useState(description);
   const [editEstimateMd, setEditEstimateMd] = useState(estimateMd);
 
   useEffect(() => {
     setEditLabel(label);
     setEditStatus(status);
+    setEditCategory(category);
     setEditDescription(description);
     setEditEstimateMd(estimateMd);
-  }, [nodeId, label, status, description, estimateMd]);
+  }, [nodeId, label, status, category, description, estimateMd]);
 
   const handleSave = () => {
-    const fields: { label?: string; status?: string; description?: string; estimateMd?: number } = {};
+    const fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number } = {};
     if (editLabel !== label) fields.label = editLabel;
     if (editStatus !== status) fields.status = editStatus;
+    if (editCategory !== category) fields.category = editCategory;
     if (editDescription !== description) fields.description = editDescription;
     if (editEstimateMd !== estimateMd) fields.estimateMd = editEstimateMd;
     if (Object.keys(fields).length > 0) {
@@ -129,6 +135,19 @@ export function NodeDetailPanel({ nodeId, label, status, description, estimateMd
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <div style={labelStyle}>カテゴリ</div>
+          <select
+            value={editCategory}
+            onChange={(e) => setEditCategory(e.target.value)}
+            style={{ ...inputStyle, cursor: "pointer" }}
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
         </div>

@@ -102,6 +102,7 @@ export function createWebAdapter(dispatch: (msg: DagMessage) => void): DagAdapte
       if (node) {
         if (fields.label !== undefined) (node as { label: string }).label = fields.label;
         if (fields.status !== undefined) (node as { status: string }).status = fields.status;
+        if (fields.category !== undefined) (node as { category: string }).category = fields.category;
         if (fields.description !== undefined) (node as { description: string }).description = fields.description;
         if (fields.estimateMd !== undefined) (node as { estimateMd: number }).estimateMd = fields.estimateMd;
         dag.derived = computeCriticalPath(dag.nodes);

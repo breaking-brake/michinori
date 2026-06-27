@@ -108,6 +108,7 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
         data: {
           label: n.label,
           estimateMd: n.estimateMd,
+          category: n.category,
           status: n.status,
           description: n.description,
           onCriticalPath: criticalSet.has(n.id),
@@ -217,6 +218,7 @@ export function DagApp({ adapter, dispatch, nodes: dagNodes, derived, loading, e
             nodeId={selectedDagNode.id}
             label={selectedDagNode.label}
             status={selectedDagNode.status}
+            category={selectedDagNode.category}
             description={selectedDagNode.description}
             estimateMd={selectedDagNode.estimateMd}
             onUpdate={(fields) => {

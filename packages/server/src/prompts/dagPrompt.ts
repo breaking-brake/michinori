@@ -8,12 +8,15 @@ Return a JSON object with a single "nodes" array. Each node has:
 - label: short task name (Japanese is preferred)
 - description: 1-2 sentence explanation of what the task involves
 - estimateMd: realistic time estimate in man-days (1 MD = 8 hours). Use 0.1 MD increments (e.g. 0.5, 1.0, 2.5)
+- category: one of "実装" (code changes), "調査" (research, PoC, library evaluation), "設計" (architecture, API design, schema design), "その他" (CI setup, docs, env config, approvals)
 - status: always "未着手" for new tasks
 - dependencies: array of prerequisite task IDs (MUST form a DAG — no cycles)
 
 RULES:
+- Each task is a self-contained unit of work (for "実装" tasks, this typically maps to one PR)
 - Generate 5-20 tasks depending on project complexity
 - Tasks should be granular enough to be actionable (0.5-5 MD each)
+- Choose the appropriate category for each task based on its nature
 - Every dependency ID must reference another node's ID in the same output
 - Dependencies MUST form a DAG (no circular references)
 - Consider the actual codebase structure — don't ignore existing code

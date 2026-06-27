@@ -37,23 +37,25 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
   const [editStatus, setEditStatus] = useState(status);
   const [editCategory, setEditCategory] = useState(category);
   const [editDescription, setEditDescription] = useState(description);
-  const [editEstimateMd, setEditEstimateMd] = useState(estimateMd);
+  const [editEstimateMdStr, setEditEstimateMdStr] = useState(String(estimateMd));
 
   useEffect(() => {
     setEditLabel(label);
     setEditStatus(status);
     setEditCategory(category);
     setEditDescription(description);
-    setEditEstimateMd(estimateMd);
+    setEditEstimateMdStr(String(estimateMd));
   }, [nodeId, label, status, category, description, estimateMd]);
 
   const handleSave = () => {
+    const parsedMd = Math.round(parseFloat(editEstimateMdStr || "0") * 10) / 10;
+    const finalMd = parsedMd > 0 ? parsedMd : 0.1;
     const fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number } = {};
     if (editLabel !== label) fields.label = editLabel;
     if (editStatus !== status) fields.status = editStatus;
     if (editCategory !== category) fields.category = editCategory;
     if (editDescription !== description) fields.description = editDescription;
-    if (editEstimateMd !== estimateMd) fields.estimateMd = editEstimateMd;
+    if (finalMd !== estimateMd) fields.estimateMd = finalMd;
     if (Object.keys(fields).length > 0) {
       onUpdate(fields);
     }
@@ -167,8 +169,8 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
             type="number"
             min="0.1"
             step="0.1"
-            value={editEstimateMd}
-            onChange={(e) => setEditEstimateMd(Math.round(parseFloat(e.target.value || "0.1") * 10) / 10)}
+            value={editEstimateMdStr}
+            onChange={(e) => setEditEstimateMdStr(e.target.value)}
             style={inputStyle}
           />
         </div>

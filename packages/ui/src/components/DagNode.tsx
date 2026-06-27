@@ -12,10 +12,11 @@ interface DagNodeData {
   status: string;
   description: string;
   onCriticalPath?: boolean;
+  onDelete?: (nodeId: string) => void;
   [key: string]: unknown;
 }
 
-export const DagNode = memo(({ data }: NodeProps) => {
+export const DagNode = memo(({ id, data, selected }: NodeProps) => {
   const d = data as DagNodeData;
   const color = STATUS_COLORS[d.status] ?? "#6b7280";
   const borderColor = d.onCriticalPath ? "#ef4444" : "var(--vscode-panel-border, #444)";
@@ -37,8 +38,39 @@ export const DagNode = memo(({ data }: NodeProps) => {
         cursor: "pointer",
         transition: "box-shadow 0.15s",
         boxShadow: hovered ? "0 2px 12px rgba(0,0,0,0.4)" : "none",
+        position: "relative",
       }}
     >
+      {selected && d.onDelete && (
+        <button
+          className="nodrag nopan"
+          onClick={(e) => {
+            e.stopPropagation();
+            d.onDelete!(id);
+          }}
+          style={{
+            position: "absolute",
+            top: -8,
+            right: -8,
+            width: 18,
+            height: 18,
+            borderRadius: "50%",
+            background: "#ef4444",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 11,
+            lineHeight: 1,
+            padding: 0,
+            zIndex: 10,
+          }}
+        >
+          ✕
+        </button>
+      )}
       <Handle type="target" position={Position.Top} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
         <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>{d.label}</span>

@@ -16,6 +16,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { DagNode } from "./components/DagNode";
+import { DeletableEdge } from "./components/DeletableEdge";
 import { Header } from "./components/Header";
 import { InputPanel } from "./components/InputPanel";
 import { ModifyPanel } from "./components/ModifyPanel";
@@ -25,6 +26,7 @@ import type { DagAdapter, DagMessage } from "./types";
 import type { DagNodeType, DagDerivedType } from "@michinori/shared";
 
 const nodeTypes = { dag: DagNode };
+const edgeTypes = { deletable: DeletableEdge };
 
 interface DagAppProps {
   adapter: DagAdapter;
@@ -121,6 +123,12 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           status: n.status,
           description: n.description,
           onCriticalPath: criticalSet.has(n.id),
+          onDelete: (nodeId: string) => {
+            if (window.confirm("このノードを削除しますか？")) {
+              setSelectedNodeId(null);
+              adapter.deleteNode(nodeId);
+            }
+          },
         },
       })),
     );
@@ -129,8 +137,12 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
       dagNodes.flatMap((n) =>
         n.dependencies.map((dep) => ({
           id: `${dep}-${n.id}`,
+          type: "deletable",
           source: dep,
           target: n.id,
+          data: {
+            onDelete: () => adapter.removeEdge(dep, n.id),
+          },
           style: {
             stroke: criticalSet.has(dep) && criticalSet.has(n.id) ? "#ef4444" : "#666",
             strokeWidth: criticalSet.has(dep) && criticalSet.has(n.id) ? 3 : 1,
@@ -178,15 +190,6 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
     [adapter],
   );
 
-  const handleEdgeClick = useCallback(
-    (_event: React.MouseEvent, edge: Edge) => {
-      if (window.confirm("この接続を削除しますか？")) {
-        adapter.removeEdge(edge.source, edge.target);
-      }
-    },
-    [adapter],
-  );
-
   const handleAddNode = useCallback(() => {
     const viewport = reactFlow.getViewport();
     const position = reactFlow.screenToFlowPosition({
@@ -203,16 +206,6 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
 
   const handleModify = useCallback(
     (prompt: string) => adapter.modify(prompt),
-    [adapter],
-  );
-
-  const handleDeleteNode = useCallback(
-    (nodeId: string) => {
-      if (window.confirm("このノードを削除しますか？接続も一緒に削除されます。")) {
-        setSelectedNodeId(null);
-        adapter.deleteNode(nodeId);
-      }
-    },
     [adapter],
   );
 
@@ -253,8 +246,8 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           onNodeDragStop={onNodeDragStop}
           onNodeClick={handleNodeClick}
           onConnect={handleConnect}
-          onEdgeClick={handleEdgeClick}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
         >
           <Background />
@@ -292,7 +285,6 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
               adapter.updateNode(selectedDagNode.id, fields);
               setSelectedNodeId(null);
             }}
-            onDelete={() => handleDeleteNode(selectedDagNode.id)}
             onClose={() => setSelectedNodeId(null)}
           />
         )}

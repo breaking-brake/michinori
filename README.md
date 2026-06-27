@@ -1,3 +1,5 @@
+[English](README.en.md)
+
 # Michinori（道のり）
 
 AI Codingの普及で、開発者はより大きな単位で開発に取り組めるようになった。

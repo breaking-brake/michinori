@@ -1,3 +1,5 @@
+[日本語](README.md)
+
 # Michinori（道のり）
 
 With the rise of AI Coding, developers can now tackle larger units of work.

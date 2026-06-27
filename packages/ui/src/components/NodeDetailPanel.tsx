@@ -56,6 +56,7 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
     if (editCategory !== category) fields.category = editCategory;
     if (editDescription !== description) fields.description = editDescription;
     if (finalMd !== estimateMd) fields.estimateMd = finalMd;
+    setEditEstimateMdStr(String(finalMd));
     if (Object.keys(fields).length > 0) {
       onUpdate(fields);
     }

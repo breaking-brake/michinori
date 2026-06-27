@@ -172,6 +172,10 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
             step="0.1"
             value={editEstimateMdStr}
             onChange={(e) => setEditEstimateMdStr(e.target.value)}
+            onBlur={() => {
+              const parsed = Math.round(parseFloat(editEstimateMdStr || "0") * 10) / 10;
+              setEditEstimateMdStr(String(parsed > 0 ? parsed : 0.1));
+            }}
             style={inputStyle}
           />
         </div>

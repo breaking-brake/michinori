@@ -147,6 +147,7 @@ export function createWebAdapter(
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
       dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
+      dispatch({ type: "chatResponse", message: "DAGに反映しました。引き続き変更の相談ができます。" });
     },
     addEdge: (sourceId, targetId) => {
       const dag = getDag();

@@ -1,12 +1,16 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ReactFlow,
   Background,
+  Controls,
   type Node,
   type Edge,
+  type OnNodesChange,
+  applyNodeChanges,
   ReactFlowProvider,
 } from "@xyflow/react";
 import { DagNode } from "./DagNode";
+import { NodeDetailPanel } from "./NodeDetailPanel";
 import { applyProposalToNodes } from "../applyProposal";
 import type { DagNodeType, DagProposalType } from "@michinori/shared";
 import { computeCriticalPath } from "@michinori/shared";
@@ -68,7 +72,7 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
 }
 
 function PreviewCanvas({ currentNodes, proposal, calendarConfig }: Pick<ProposalPreviewDialogProps, "currentNodes" | "proposal" | "calendarConfig">) {
-  const { flowNodes, flowEdges, summary } = useMemo(() => {
+  const { initialNodes, initialEdges, previewDagNodes, summary } = useMemo(() => {
     const previewNodes = applyProposalToNodes(currentNodes, proposal);
     const derived = computeCriticalPath(previewNodes, calendarConfig);
     const criticalSet = new Set(derived.criticalPath);
@@ -109,8 +113,9 @@ function PreviewCanvas({ currentNodes, proposal, calendarConfig }: Pick<Proposal
     );
 
     return {
-      flowNodes: nodes,
-      flowEdges: edges,
+      initialNodes: nodes,
+      initialEdges: edges,
+      previewDagNodes: previewNodes,
       summary: {
         added: proposal.additions.length,
         removed: proposal.removals.length,
@@ -118,6 +123,23 @@ function PreviewCanvas({ currentNodes, proposal, calendarConfig }: Pick<Proposal
       },
     };
   }, [currentNodes, proposal, calendarConfig]);
+
+  const [flowNodes, setFlowNodes] = useState<Node[]>(initialNodes);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  const selectedNode = selectedNodeId ? previewDagNodes.find((n) => n.id === selectedNodeId) : null;
+
+  const onNodesChange: OnNodesChange = useCallback(
+    (changes) => setFlowNodes((nds) => applyNodeChanges(changes, nds)),
+    [],
+  );
+
+  const handleNodeClick = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      setSelectedNodeId(node.id);
+    },
+    [],
+  );
 
   return (
     <>
@@ -130,20 +152,34 @@ function PreviewCanvas({ currentNodes, proposal, calendarConfig }: Pick<Proposal
           <span style={{ display: "inline-block", width: 10, height: 10, border: "2px dashed #fbbf24", marginLeft: 12, marginRight: 4, verticalAlign: "middle" }} /> 変更
         </span>
       </div>
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, position: "relative" }}>
         <ReactFlow
           nodes={flowNodes}
-          edges={flowEdges}
+          edges={initialEdges}
+          onNodesChange={onNodesChange}
+          onNodeClick={handleNodeClick}
           nodeTypes={nodeTypes}
           fitView
-          nodesDraggable={false}
           nodesConnectable={false}
-          elementsSelectable={false}
           panOnDrag
           zoomOnScroll
         >
           <Background />
+          <Controls />
         </ReactFlow>
+        {selectedNode && (
+          <NodeDetailPanel
+            nodeId={selectedNode.id}
+            label={selectedNode.label}
+            status={selectedNode.status}
+            category={selectedNode.category}
+            description={selectedNode.description}
+            estimateMd={selectedNode.estimateMd}
+            onUpdate={() => setSelectedNodeId(null)}
+            onClose={() => setSelectedNodeId(null)}
+            readOnly
+          />
+        )}
       </div>
     </>
   );

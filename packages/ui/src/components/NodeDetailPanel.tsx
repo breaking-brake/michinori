@@ -30,9 +30,10 @@ interface NodeDetailPanelProps {
   estimateMd: number;
   onUpdate: (fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number }) => void;
   onClose: () => void;
+  readOnly?: boolean;
 }
 
-export function NodeDetailPanel({ nodeId, label, status, category, description, estimateMd, onUpdate, onClose }: NodeDetailPanelProps) {
+export function NodeDetailPanel({ nodeId, label, status, category, description, estimateMd, onUpdate, onClose, readOnly = false }: NodeDetailPanelProps) {
   const [editLabel, setEditLabel] = useState(label);
   const [editStatus, setEditStatus] = useState(status);
   const [editCategory, setEditCategory] = useState(category);
@@ -124,6 +125,7 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
             type="text"
             value={editLabel}
             onChange={(e) => setEditLabel(e.target.value)}
+            disabled={readOnly}
             style={inputStyle}
           />
         </div>
@@ -133,7 +135,8 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
           <select
             value={editStatus}
             onChange={(e) => setEditStatus(e.target.value)}
-            style={{ ...inputStyle, cursor: "pointer" }}
+            disabled={readOnly}
+            style={{ ...inputStyle, cursor: readOnly ? "default" : "pointer" }}
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
@@ -146,7 +149,8 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
           <select
             value={editCategory}
             onChange={(e) => setEditCategory(e.target.value)}
-            style={{ ...inputStyle, cursor: "pointer" }}
+            disabled={readOnly}
+            style={{ ...inputStyle, cursor: readOnly ? "default" : "pointer" }}
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>{c}</option>
@@ -159,6 +163,7 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
           <textarea
             value={editDescription}
             onChange={(e) => setEditDescription(e.target.value)}
+            disabled={readOnly}
             rows={5}
             style={{ ...inputStyle, resize: "vertical" as const }}
           />
@@ -176,25 +181,28 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
               const parsed = Math.round(parseFloat(editEstimateMdStr || "0") * 10) / 10;
               setEditEstimateMdStr(String(parsed > 0 ? parsed : 0.1));
             }}
+            disabled={readOnly}
             style={inputStyle}
           />
         </div>
 
-        <button
-          onClick={handleSave}
-          style={{
-            padding: "8px 16px",
-            background: "var(--vscode-button-background, #0e639c)",
-            color: "var(--vscode-button-foreground, #fff)",
-            border: "none",
-            borderRadius: 4,
-            cursor: "pointer",
-            fontSize: 13,
-            marginTop: 4,
-          }}
-        >
-          保存
-        </button>
+        {!readOnly && (
+          <button
+            onClick={handleSave}
+            style={{
+              padding: "8px 16px",
+              background: "var(--vscode-button-background, #0e639c)",
+              color: "var(--vscode-button-foreground, #fff)",
+              border: "none",
+              borderRadius: 4,
+              cursor: "pointer",
+              fontSize: 13,
+              marginTop: 4,
+            }}
+          >
+            保存
+          </button>
+        )}
       </div>
     </div>
   );

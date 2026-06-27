@@ -30,6 +30,7 @@ export const DagProposal = z.object({
       estimateMd: z.number().optional(),
       category: z.string().optional(),
       status: z.string().optional(),
+      position: z.object({ x: z.number(), y: z.number() }).optional(),
     }),
   })).default([]),
 });

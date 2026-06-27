@@ -20,7 +20,7 @@ const proposeDagChangesTool = {
         },
         proposal_json: {
           type: Type.STRING,
-          description: `A JSON string with the structure: { "additions": [{ "id": "kebab-id", "label": "タスク名", "description": "説明", "estimateMd": 1.0, "category": "実装", "status": "未着手", "dependencies": [] }], "removals": ["node-id-to-remove"], "modifications": [{ "nodeId": "existing-id", "changes": { "label": "新名", "estimateMd": 2.0 } }] }. All arrays are optional, include only what changes.`,
+          description: `A JSON string with the structure: { "additions": [{ "id": "kebab-id", "label": "タスク名", "description": "説明", "estimateMd": 1.0, "category": "実装", "status": "未着手", "dependencies": [], "position": { "x": 0, "y": 0 } }], "removals": ["node-id-to-remove"], "modifications": [{ "nodeId": "existing-id", "changes": { "label": "新名", "estimateMd": 2.0, "position": { "x": 100, "y": 200 } } }] }. All arrays are optional, include only what changes. position is optional — include it only when the user explicitly asks to adjust layout.`,
         },
       },
       required: ["reasoning", "proposal_json"],

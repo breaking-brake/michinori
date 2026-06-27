@@ -278,6 +278,7 @@ export function createWebAdapter(
           if (mod.changes.estimateMd !== undefined) (node as { estimateMd: number }).estimateMd = mod.changes.estimateMd;
           if (mod.changes.category !== undefined) (node as { category: string }).category = mod.changes.category;
           if (mod.changes.status !== undefined) (node as { status: string }).status = mod.changes.status;
+          if (mod.changes.position !== undefined) node.position = mod.changes.position;
         }
       }
 

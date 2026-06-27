@@ -21,6 +21,7 @@ export function applyProposalToNodes(
       if (mod.changes.estimateMd !== undefined) node.estimateMd = mod.changes.estimateMd;
       if (mod.changes.category !== undefined) node.category = mod.changes.category as DagNodeType["category"];
       if (mod.changes.status !== undefined) node.status = mod.changes.status as DagNodeType["status"];
+      if (mod.changes.position !== undefined) node.position = mod.changes.position;
     }
   }
 

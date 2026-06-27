@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { STATUS_DEFINITIONS, CATEGORY_DEFINITIONS } from "@michinori/shared";
 
@@ -20,12 +20,8 @@ export const DagNode = memo(({ id, data, selected }: NodeProps) => {
   const d = data as DagNodeData;
   const color = STATUS_COLORS[d.status] ?? "#6b7280";
   const borderColor = d.onCriticalPath ? "#ef4444" : "var(--vscode-panel-border, #444)";
-  const [hovered, setHovered] = useState(false);
-
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         padding: "12px 16px",
         borderRadius: 8,
@@ -36,8 +32,6 @@ export const DagNode = memo(({ id, data, selected }: NodeProps) => {
         maxWidth: 240,
         fontSize: 13,
         cursor: "pointer",
-        transition: "box-shadow 0.15s",
-        boxShadow: hovered ? "0 2px 12px rgba(0,0,0,0.4)" : "none",
         position: "relative",
       }}
     >
@@ -89,11 +83,6 @@ export const DagNode = memo(({ id, data, selected }: NodeProps) => {
           {d.category}
         </span>
       </div>
-      {hovered && d.description && (
-        <div style={{ fontSize: 11, opacity: 0.7, marginBottom: 6, lineHeight: 1.4 }}>
-          {d.description}
-        </div>
-      )}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span
           style={{

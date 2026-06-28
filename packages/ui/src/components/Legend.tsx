@@ -48,7 +48,7 @@ function LineIndicator({ color, dashed }: { color: string; dashed?: boolean }) {
   );
 }
 
-export function Legend() {
+export function Legend({ showCriticalPath = false }: { showCriticalPath?: boolean }) {
   return (
     <div
       style={{
@@ -63,10 +63,12 @@ export function Legend() {
     >
       <div style={sectionStyle}>
         <div style={titleStyle}>エッジ</div>
-        <div style={itemStyle}>
-          <LineIndicator color="#ef4444" />
-          <span>クリティカルパス</span>
-        </div>
+        {showCriticalPath && (
+          <div style={itemStyle}>
+            <LineIndicator color="#ef4444" />
+            <span>クリティカルパス</span>
+          </div>
+        )}
         <div style={itemStyle}>
           <LineIndicator color="#666" dashed />
           <span>依存関係</span>

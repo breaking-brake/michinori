@@ -269,9 +269,9 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         >
           <Background />
           <Controls />
-          {hasDag && showCriticalPath && (
+          {hasDag && (
             <Panel position="bottom-left">
-              <Legend />
+              <Legend showCriticalPath={showCriticalPath} />
             </Panel>
           )}
           {hasDag && (

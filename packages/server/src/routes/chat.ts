@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { GoogleGenAI, Type, FunctionCallingConfigMode, type FunctionDeclaration } from "@google/genai";
+import { GoogleGenAI, Type, FunctionCallingConfigMode, type FunctionDeclaration, type Content } from "@google/genai";
 import { ChatRequest } from "@michinori/shared";
 import type { DagProposalType } from "@michinori/shared";
 import { buildChatSystemPrompt } from "../prompts/chatPrompt.js";
@@ -144,7 +144,7 @@ chat.post("/", async (c) => {
       ],
     }];
 
-    const contents = [
+    const contents: Content[] = [
       ...conversationHistory.map((msg) => ({
         role: msg.role as "user" | "model",
         parts: [{ text: msg.content }],
@@ -181,17 +181,16 @@ chat.post("/", async (c) => {
       });
 
       const textParts = parts.filter((p) => p.text).map((p) => p.text).join("");
-      const functionCallPart = parts.find((p) => p.functionCall);
+      const functionCalls = parts.filter((p) => p.functionCall);
 
-      if (!functionCallPart) {
+      if (functionCalls.length === 0) {
         responseMessage = textParts;
         break;
       }
 
-      const fnName = functionCallPart.functionCall!.name!;
-      const fnArgs = (functionCallPart.functionCall!.args ?? {}) as Record<string, unknown>;
-
-      if (fnName === "propose_dag_changes") {
+      const dagProposalCall = functionCalls.find((p) => p.functionCall!.name === "propose_dag_changes");
+      if (dagProposalCall) {
+        const fnArgs = (dagProposalCall.functionCall!.args ?? {}) as Record<string, unknown>;
         const reasoning = (fnArgs.reasoning as string) ?? "";
         const proposalJsonStr = (fnArgs.proposal_json as string) ?? "{}";
         logger.info("chat:function_call", { reasoning, proposalJson: proposalJsonStr.slice(0, 500) });
@@ -217,13 +216,22 @@ chat.post("/", async (c) => {
         break;
       }
 
-      if (repoFiles && ["list_files", "read_file", "search_code"].includes(fnName)) {
-        const toolResult = handleRepoTool(fnName, fnArgs, repoFiles);
-        logger.info("chat:repoTool", { tool: fnName, resultLength: toolResult.length });
+      const repoToolCalls = functionCalls.filter(
+        (p) => repoFiles && ["list_files", "read_file", "search_code"].includes(p.functionCall!.name!),
+      );
+
+      if (repoToolCalls.length > 0 && repoFiles) {
+        const functionResponses = repoToolCalls.map((p) => {
+          const fnName = p.functionCall!.name!;
+          const fnArgs = (p.functionCall!.args ?? {}) as Record<string, unknown>;
+          const toolResult = handleRepoTool(fnName, fnArgs, repoFiles);
+          logger.info("chat:repoTool", { tool: fnName, resultLength: toolResult.length });
+          return { functionResponse: { name: fnName, response: { result: toolResult } } };
+        });
 
         contents.push(
-          { role: "model" as const, parts: parts as any },
-          { role: "user" as const, parts: [{ functionResponse: { name: fnName, response: { result: toolResult } } }] as any },
+          { role: "model" as const, parts },
+          { role: "user" as const, parts: functionResponses },
         );
         continue;
       }

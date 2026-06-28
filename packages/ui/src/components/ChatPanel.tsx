@@ -11,21 +11,27 @@ interface ChatPanelProps {
   onClose: () => void;
 }
 
-function ProposalBlock({ proposal, dismissed }: { proposal: DagProposalType; dismissed: boolean }) {
+function ProposalBlock({ proposal, dismissed, applied }: { proposal: DagProposalType; dismissed: boolean; applied: boolean }) {
+  const resolved = dismissed || applied;
+  const borderColor = applied ? "#10b981" : dismissed ? "#555" : "#3b82f6";
+  const bgColor = applied ? "rgba(16,185,129,0.1)" : dismissed ? "rgba(100,100,100,0.1)" : "rgba(59,130,246,0.1)";
+  const labelColor = applied ? "#6ee7b7" : dismissed ? "#888" : "#93c5fd";
+  const suffix = applied ? "（反映済み）" : dismissed ? "（見送り）" : "";
+
   return (
     <div
       style={{
         margin: "8px 0",
         padding: 10,
         borderRadius: 6,
-        border: `1px solid ${dismissed ? "#555" : "#3b82f6"}`,
-        background: dismissed ? "rgba(100,100,100,0.1)" : "rgba(59,130,246,0.1)",
+        border: `1px solid ${borderColor}`,
+        background: bgColor,
         fontSize: 12,
-        opacity: dismissed ? 0.5 : 1,
+        opacity: resolved ? 0.5 : 1,
       }}
     >
-      <div style={{ fontWeight: 600, marginBottom: 6, color: dismissed ? "#888" : "#93c5fd" }}>
-        DAG変更提案{dismissed ? "（見送り）" : ""}
+      <div style={{ fontWeight: 600, marginBottom: 6, color: labelColor }}>
+        DAG変更提案{suffix}
       </div>
       <div style={{ opacity: 0.8, marginBottom: 8 }}>{proposal.reasoning}</div>
       {proposal.additions.length > 0 && (
@@ -57,8 +63,8 @@ export function ChatPanel({ messages, loading, onSendMessage, onApplyProposal, o
   const pendingProposal = (() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
-      if (msg.proposal && !msg.dismissed) return msg.proposal;
-      if (msg.proposal && msg.dismissed) return null;
+      if (msg.proposal && !msg.dismissed && !msg.applied) return msg.proposal;
+      if (msg.proposal && (msg.dismissed || msg.applied)) return null;
     }
     return null;
   })();
@@ -173,6 +179,7 @@ export function ChatPanel({ messages, loading, onSendMessage, onApplyProposal, o
               <ProposalBlock
                 proposal={msg.proposal}
                 dismissed={!!msg.dismissed}
+                applied={!!msg.applied}
               />
             )}
           </div>

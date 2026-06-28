@@ -149,16 +149,26 @@ export function ChatPanel({ messages, loading, onSendMessage, onApplyProposal, o
             DAGについて質問や変更の相談ができます
           </div>
         )}
-        {messages.map((msg, i) => (
+        {messages.map((msg, i) => {
+          const isSystemAnnouncement = msg.content.startsWith("システムアナウンス:");
+          return (
           <div key={i}>
             <div
               style={{
                 padding: "8px 12px",
                 borderRadius: 8,
-                fontSize: 13,
+                fontSize: isSystemAnnouncement ? 11 : 13,
                 lineHeight: 1.5,
                 whiteSpace: "pre-wrap",
-                ...(msg.role === "user"
+                ...(isSystemAnnouncement
+                  ? {
+                      background: "rgba(100,100,100,0.2)",
+                      color: "#999",
+                      textAlign: "center" as const,
+                      marginLeft: 20,
+                      marginRight: 20,
+                    }
+                  : msg.role === "user"
                   ? {
                       background: "var(--vscode-button-background, #0e639c)",
                       color: "#fff",
@@ -183,7 +193,7 @@ export function ChatPanel({ messages, loading, onSendMessage, onApplyProposal, o
               />
             )}
           </div>
-        ))}
+        );})}
         {loading && (
           <div style={{ opacity: 0.5, fontSize: 12 }}>考え中...</div>
         )}

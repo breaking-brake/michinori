@@ -92,7 +92,7 @@ export function useDagMessages() {
         ...prev.chatMessages.map((msg) =>
           msg.proposal && !msg.dismissed && !msg.applied ? { ...msg, applied: true } : msg,
         ),
-        { role: "user" as const, content: "System announcement: The proposed DAG changes have been applied. Use the updated DAG as the current state going forward." },
+        { role: "user" as const, content: "システムアナウンス: この提案はDAGに反映されました。以降は更新後のDAGを前提に会話してください。" },
       ],
     }));
   }, []);

@@ -21,7 +21,7 @@ function getVSCodeApi(): VSCodeApi | null {
 }
 
 export default function App() {
-  const { state, dispatch } = useDagMessages();
+  const { state, dispatch, dismissProposal, markProposalApplied } = useDagMessages();
   const vscode = getVSCodeApi();
 
   useEffect(() => {
@@ -88,6 +88,8 @@ export default function App() {
       customDayOn={state.customDayOn}
       chatMessages={state.chatMessages}
       chatLoading={state.chatLoading}
+      onDismissProposal={dismissProposal}
+      onMarkProposalApplied={markProposalApplied}
     />
   );
 }

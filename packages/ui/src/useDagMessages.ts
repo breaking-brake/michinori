@@ -43,6 +43,7 @@ export function useDagMessages() {
           calendarPreset: msg.calendar?.preset ?? prev.calendarPreset,
           customDayOff: msg.calendar?.customDayOff ?? prev.customDayOff,
           customDayOn: msg.calendar?.customDayOn ?? prev.customDayOn,
+          ...(msg.nodes.length === 0 ? { chatMessages: [], chatLoading: false } : {}),
         }));
         break;
       case "loading":
@@ -84,7 +85,19 @@ export function useDagMessages() {
     }));
   }, []);
 
+  const markProposalApplied = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      chatMessages: [
+        ...prev.chatMessages.map((msg) =>
+          msg.proposal && !msg.dismissed && !msg.applied ? { ...msg, applied: true } : msg,
+        ),
+        { role: "user" as const, content: "システムアナウンス: この提案はDAGに反映されました。以降は更新後のDAGを前提に会話してください。" },
+      ],
+    }));
+  }, []);
+
   const reset = useCallback(() => setState(INITIAL_STATE), []);
 
-  return { state, dispatch, addUserChatMessage, dismissProposal, reset };
+  return { state, dispatch, addUserChatMessage, dismissProposal, markProposalApplied, reset };
 }

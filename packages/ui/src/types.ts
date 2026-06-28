@@ -29,6 +29,7 @@ export interface ChatMessage {
   content: string;
   proposal?: DagProposalType;
   dismissed?: boolean;
+  applied?: boolean;
 }
 
 export type DagMessage =

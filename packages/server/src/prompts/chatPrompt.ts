@@ -24,7 +24,7 @@ export function buildChatSystemPrompt(currentDag: MichinoriFileType, hasRepoAcce
 
   return `あなたはプロジェクト計画のAIアシスタントです。ユーザーとDAG（有向非巡回グラフ）の計画について会話します。
 
-## 現在のDAG
+## 現在のDAG（最新の状態 — 会話履歴中の古いDAGより常にこちらを信頼してください）
 \`\`\`json
 ${nodesJson}
 \`\`\`

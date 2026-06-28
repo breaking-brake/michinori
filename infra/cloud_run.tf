@@ -7,7 +7,7 @@ resource "google_cloud_run_v2_service" "api" {
 
     scaling {
       min_instance_count = 0
-      max_instance_count = 3
+      max_instance_count = 1
     }
 
     timeout = "300s"
@@ -32,12 +32,28 @@ resource "google_cloud_run_v2_service" "api" {
         name  = "NODE_ENV"
         value = "production"
       }
+
+      env {
+        name  = "GEMINI_API_KEY"
+        value = var.gemini_api_key
+      }
+
+      env {
+        name  = "GEO_BLOCK_ENABLED"
+        value = "true"
+      }
+
+      env {
+        name  = "DAILY_QUOTA_LIMIT"
+        value = "100"
+      }
     }
   }
 
   lifecycle {
     ignore_changes = [
       template[0].containers[0].image,
+      template[0].containers[0].env,
     ]
   }
 

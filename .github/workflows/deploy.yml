@@ -1,0 +1,47 @@
+name: Deploy to Cloud Run
+
+on:
+  workflow_dispatch:
+
+env:
+  REGION: asia-northeast1
+  SERVICE: michinori-api
+  REPO: michinori
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/server"
+          docker build -t "${IMAGE}:${{ github.sha }}" -t "${IMAGE}:latest" .
+          docker push "${IMAGE}:${{ github.sha }}"
+          docker push "${IMAGE}:latest"
+
+      - name: Deploy to Cloud Run
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/server:${{ github.sha }}"
+          gcloud run deploy ${{ env.SERVICE }} \
+            --image "${IMAGE}" \
+            --region ${{ env.REGION }} \
+            --set-env-vars "NODE_ENV=production,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},GEO_BLOCK_ENABLED=true,DAILY_QUOTA_LIMIT=100"

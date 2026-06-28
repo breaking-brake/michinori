@@ -5,6 +5,8 @@ node_modules
 *.tfstate.backup
 *.tfvars
 packages/extension
+packages/web/node_modules
+packages/ui/node_modules
 infra
 docs
 .claude

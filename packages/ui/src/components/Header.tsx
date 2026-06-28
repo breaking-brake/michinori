@@ -12,6 +12,8 @@ const headerBtnStyle = {
 interface HeaderProps {
   completionDate: string | null;
   remainingMd: number;
+  showCriticalPath?: boolean;
+  onToggleCriticalPath?: () => void;
   onReset?: () => void;
   onSave?: () => void;
   onLoad?: () => void;
@@ -19,7 +21,7 @@ interface HeaderProps {
   onChat?: () => void;
 }
 
-export function Header({ completionDate, remainingMd, onReset, onSave, onLoad, onCalendar, onChat }: HeaderProps) {
+export function Header({ completionDate, remainingMd, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat }: HeaderProps) {
   return (
     <div
       style={{
@@ -42,6 +44,20 @@ export function Header({ completionDate, remainingMd, onReset, onSave, onLoad, o
           <span style={{ opacity: 0.6 }}>残り {remainingMd}MD</span>
           {onCalendar && (
             <button onClick={onCalendar} style={headerBtnStyle}>稼働日設定</button>
+          )}
+          {onToggleCriticalPath && (
+            <button
+              onClick={onToggleCriticalPath}
+              style={{
+                ...headerBtnStyle,
+                opacity: 1,
+                background: showCriticalPath ? "rgba(239, 68, 68, 0.2)" : "transparent",
+                borderColor: showCriticalPath ? "#ef4444" : "var(--vscode-panel-border, #444)",
+                color: showCriticalPath ? "#ef4444" : "var(--vscode-foreground, #ccc)",
+              }}
+            >
+              クリティカルパス {showCriticalPath ? "ON" : "OFF"}
+            </button>
           )}
         </>
       ) : (

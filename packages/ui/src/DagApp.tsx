@@ -18,6 +18,7 @@ import "@xyflow/react/dist/style.css";
 import { DagNode } from "./components/DagNode";
 import { DeletableEdge } from "./components/DeletableEdge";
 import { Header } from "./components/Header";
+import { Legend } from "./components/Legend";
 import { InputPanel } from "./components/InputPanel";
 import { ChatPanel } from "./components/ChatPanel";
 import { LoadingOverlay } from "./components/LoadingOverlay";
@@ -109,6 +110,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [showCriticalPath, setShowCriticalPath] = useState(false);
   const [pendingProposal, setPendingProposal] = useState<DagProposalType | null>(null);
   const reactFlow = useReactFlow();
 
@@ -121,7 +123,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
       return;
     }
 
-    const criticalSet = new Set(derived.criticalPath);
+    const criticalSet = showCriticalPath ? new Set(derived.criticalPath) : new Set<string>();
     const positions = autoLayout(dagNodes);
 
     setFlowNodes(
@@ -164,7 +166,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         })),
       ),
     );
-  }, [dagNodes, derived]);
+  }, [dagNodes, derived, showCriticalPath]);
 
   useEffect(() => {
     adapter.onReady();
@@ -224,6 +226,8 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
       <Header
         completionDate={derived?.estimatedCompletionDate ?? null}
         remainingMd={derived?.remainingMd ?? 0}
+        showCriticalPath={showCriticalPath}
+        onToggleCriticalPath={hasDag ? () => setShowCriticalPath(!showCriticalPath) : undefined}
         onCalendar={() => { setCalendarOpen(!calendarOpen); setSelectedNodeId(null); setChatOpen(false); }}
         onChat={hasDag ? () => { setChatOpen(!chatOpen); setSelectedNodeId(null); setCalendarOpen(false); } : undefined}
         onSave={() => adapter.save()}
@@ -265,6 +269,11 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         >
           <Background />
           <Controls />
+          {hasDag && showCriticalPath && (
+            <Panel position="bottom-left">
+              <Legend />
+            </Panel>
+          )}
           {hasDag && (
             <Panel position="top-left">
               <button

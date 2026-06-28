@@ -26,7 +26,7 @@
 │    リポジトリ調査ツール (list_files/read_file/     │
 │    search_code) で自律的にコードを確認             │
 │                                                   │
-│  Middleware: Rate Limit / Geo Block               │
+│  Middleware: Rate Limit / Geo Block / Daily Quota  │
 └───────────────────────────────────────────────────┘
 ```
 
@@ -72,3 +72,7 @@ packages/
 - Status/Category definitions live in `packages/shared/src/schema/dag.ts` (single source — adding a new value there propagates to Zod, Gemini prompt, responseSchema, UI colors, and dropdowns)
 - API key is server-side only (`GEMINI_API_KEY` in `.env`), never sent from clients
 - Repo code context is cached in-memory (30min TTL) from `/analyze`, reused by `/chat` for repo investigation tools
+
+## Tech Debt
+
+- **Daily quota counter is in-memory** — resets on server restart. Sufficient for max-instances=1 (hackathon). If scaling to multiple instances, migrate to Firestore or Redis.

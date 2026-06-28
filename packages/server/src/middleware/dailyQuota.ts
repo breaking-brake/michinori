@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from "hono";
 import { logger } from "../utils/logger.js";
 import { env } from "../config/env.js";
 
+// Tech debt: インメモリのため再起動でリセットされる。max-instances>1にする場合はFirestore等に永続化が必要。
 let dailyCount = 0;
 let currentDateKey = "";
 

@@ -8,6 +8,7 @@ const EnvSchema = z.object({
   RATE_LIMIT_GLOBAL: z.coerce.number().default(30),
   GEO_BLOCK_ENABLED: z.coerce.boolean().default(true),
   DAILY_QUOTA_LIMIT: z.coerce.number().default(100),
+  QUOTA_BUCKET: z.string().optional(),
 });
 
 function loadEnv() {

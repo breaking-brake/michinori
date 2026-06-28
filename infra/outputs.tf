@@ -22,3 +22,8 @@ output "github_actions_service_account" {
   value       = google_service_account.github_actions.email
   description = "Service account for GitHub Actions"
 }
+
+output "quota_bucket" {
+  value       = google_storage_bucket.quota.name
+  description = "Cloud Storage bucket for quota counter"
+}

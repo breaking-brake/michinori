@@ -15,12 +15,6 @@ variable "container_image" {
   default     = ""
 }
 
-variable "gemini_api_key" {
-  description = "Gemini API key for Cloud Run"
-  type        = string
-  sensitive   = true
-}
-
 variable "github_owner" {
   description = "GitHub repository owner"
   type        = string

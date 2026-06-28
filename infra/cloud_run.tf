@@ -52,6 +52,11 @@ resource "google_cloud_run_v2_service" "api" {
         name  = "DAILY_QUOTA_LIMIT"
         value = "100"
       }
+
+      env {
+        name  = "QUOTA_BUCKET"
+        value = google_storage_bucket.quota.name
+      }
     }
   }
 

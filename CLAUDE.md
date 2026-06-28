@@ -75,4 +75,4 @@ packages/
 
 ## Tech Debt
 
-- **Daily quota counter is in-memory** — resets on server restart. Sufficient for max-instances=1 (hackathon). If scaling to multiple instances, migrate to Firestore or Redis.
+- **Daily quota counter is Cloud Storage-based** — single JSON file in GCS bucket. Sufficient for max-instances=1 (hackathon). If scaling to multiple instances, migrate to Firestore or Redis for atomic increments.

@@ -1,10 +1,22 @@
 import type { MiddlewareHandler } from "hono";
+import { Storage } from "@google-cloud/storage";
 import { logger } from "../utils/logger.js";
 import { env } from "../config/env.js";
 
-// Tech debt: インメモリのため再起動でリセットされる。max-instances>1にする場合はFirestore等に永続化が必要。
-let dailyCount = 0;
-let currentDateKey = "";
+const BUCKET_NAME = env.QUOTA_BUCKET ?? "";
+const OBJECT_NAME = "daily-quota.json";
+
+interface QuotaData {
+  dateKey: string;
+  count: number;
+}
+
+let storage: Storage | null = null;
+
+function getStorage(): Storage {
+  if (!storage) storage = new Storage();
+  return storage;
+}
 
 function getJstDateKey(): string {
   const now = new Date();
@@ -12,18 +24,45 @@ function getJstDateKey(): string {
   return jst.toISOString().slice(0, 10);
 }
 
-function getCount(): number {
+let cached: QuotaData | null = null;
+
+async function readQuota(): Promise<QuotaData> {
   const dateKey = getJstDateKey();
-  if (dateKey !== currentDateKey) {
-    currentDateKey = dateKey;
-    dailyCount = 0;
+
+  if (cached && cached.dateKey === dateKey) return cached;
+
+  if (!BUCKET_NAME) {
+    cached = { dateKey, count: 0 };
+    return cached;
   }
-  return dailyCount;
+
+  try {
+    const [content] = await getStorage().bucket(BUCKET_NAME).file(OBJECT_NAME).download();
+    const data = JSON.parse(content.toString()) as QuotaData;
+    if (data.dateKey === dateKey) {
+      cached = data;
+      return cached;
+    }
+  } catch {
+    // file doesn't exist or parse error — start fresh
+  }
+
+  cached = { dateKey, count: 0 };
+  return cached;
 }
 
-function increment(): number {
-  getCount();
-  return ++dailyCount;
+async function writeQuota(data: QuotaData): Promise<void> {
+  cached = data;
+  if (!BUCKET_NAME) return;
+
+  try {
+    await getStorage()
+      .bucket(BUCKET_NAME)
+      .file(OBJECT_NAME)
+      .save(JSON.stringify(data), { contentType: "application/json" });
+  } catch (err) {
+    logger.error("dailyQuota:writeFailed", { error: String(err) });
+  }
 }
 
 function isDev(): boolean {
@@ -47,11 +86,11 @@ export function dailyQuota(limit: number): MiddlewareHandler {
       return;
     }
 
-    const used = getCount();
+    const quota = await readQuota();
 
-    if (used >= limit) {
+    if (quota.count >= limit) {
       const retryAfter = getSecondsUntilJstMidnight();
-      logger.warn("dailyQuota:exceeded", { used, limit });
+      logger.warn("dailyQuota:exceeded", { used: quota.count, limit });
       c.header("Retry-After", String(retryAfter));
       c.header("X-Quota-Limit", String(limit));
       c.header("X-Quota-Remaining", "0");
@@ -59,15 +98,16 @@ export function dailyQuota(limit: number): MiddlewareHandler {
         error: "本日の利用上限に達しました（リセット: 0:00 JST）",
         code: "DAILY_QUOTA_EXCEEDED",
         quotaLimit: limit,
-        quotaUsed: used,
+        quotaUsed: quota.count,
       }, 429);
     }
 
     await next();
 
-    const newCount = increment();
+    quota.count++;
+    await writeQuota(quota);
     c.header("X-Quota-Limit", String(limit));
-    c.header("X-Quota-Remaining", String(Math.max(0, limit - newCount)));
+    c.header("X-Quota-Remaining", String(Math.max(0, limit - quota.count)));
   };
 }
 
@@ -75,11 +115,11 @@ export function getQuotaInfo(limit: number) {
   if (isDev()) {
     return { limit: -1, used: 0, remaining: -1, isAdmin: true, resetsAt: null };
   }
-  const used = getCount();
+  const quota = cached ?? { dateKey: getJstDateKey(), count: 0 };
   return {
     limit,
-    used,
-    remaining: Math.max(0, limit - used),
+    used: quota.count,
+    remaining: Math.max(0, limit - quota.count),
     isAdmin: false,
     resetsAt: "00:00 JST",
   };

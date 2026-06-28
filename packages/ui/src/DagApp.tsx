@@ -259,6 +259,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           onConnect={handleConnect}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
+          colorMode="dark"
           fitView
         >
           <Background />

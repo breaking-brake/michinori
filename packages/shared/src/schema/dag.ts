@@ -9,9 +9,9 @@ export const STATUS_DEFINITIONS = [
 
 export const CATEGORY_DEFINITIONS = [
   { value: "実装", description: "code changes", color: "#8b5cf6" },
-  { value: "調査", description: "research, PoC, library evaluation", color: "#06b6d4" },
-  { value: "設計", description: "architecture, API design, schema design", color: "#f97316" },
-  { value: "テスト", description: "test writing, QA, E2E testing, manual verification", color: "#ec4899" },
+  { value: "調査", description: "research, PoC, library evaluation", color: "#0891b2" },
+  { value: "設計", description: "architecture, API design, schema design", color: "#c2410c" },
+  { value: "テスト", description: "test writing, QA, E2E testing, manual verification", color: "#be185d" },
   { value: "その他", description: "CI setup, docs, env config, approvals", color: "#6b7280" },
 ] as const;
 

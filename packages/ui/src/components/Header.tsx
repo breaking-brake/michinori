@@ -15,7 +15,7 @@ interface HeaderProps {
   completionDate: string | null;
   remainingMd: number;
   repoUrl?: string;
-  prompt?: string;
+  summary?: string;
   showCriticalPath?: boolean;
   onToggleCriticalPath?: () => void;
   onReset?: () => void;
@@ -26,7 +26,7 @@ interface HeaderProps {
   quota?: QuotaInfo | null;
 }
 
-export function Header({ completionDate, remainingMd, repoUrl, prompt, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota }: HeaderProps) {
+export function Header({ completionDate, remainingMd, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota }: HeaderProps) {
   return (
     <div
       style={{
@@ -112,9 +112,9 @@ export function Header({ completionDate, remainingMd, repoUrl, prompt, showCriti
         }}
       >
         <span style={{ flexShrink: 0 }}>{repoUrl}</span>
-        {prompt && (
+        {summary && (
           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {prompt}
+            {summary}
           </span>
         )}
       </div>

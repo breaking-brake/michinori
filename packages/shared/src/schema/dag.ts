@@ -64,6 +64,7 @@ export const MichinoriFile = z.object({
   metadata: z.object({
     repoUrl: z.string().url(),
     prompt: z.string(),
+    summary: z.string().default(""),
     generatedAt: z.string().datetime(),
     updatedAt: z.string().datetime(),
     model: z.string().default("gemini-2.5-flash"),

@@ -28,7 +28,7 @@ export default function App() {
       error={state.error}
       hasDag={state.hasDag}
       repoUrl={state.repoUrl}
-      prompt={state.prompt}
+      summary={state.summary}
       defaultRepoUrl="https://github.com/breaking-brake/michinori"
       defaultPrompt="docs/devops-ai-agent-hackathon.md のハッカソンに入稿するまでのタスクを整理して"
       calendarPreset={state.calendarPreset}

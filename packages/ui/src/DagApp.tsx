@@ -41,7 +41,7 @@ interface DagAppProps {
   error: string | null;
   hasDag: boolean;
   repoUrl?: string;
-  prompt?: string;
+  summary?: string;
   defaultRepoUrl?: string;
   defaultPrompt?: string;
   calendarPreset?: string;
@@ -107,7 +107,7 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, repoUrl, prompt, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false, onDismissProposal, onMarkProposalApplied, quota }: DagAppProps) {
+function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, repoUrl, summary, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false, onDismissProposal, onMarkProposalApplied, quota }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -230,7 +230,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         completionDate={derived?.estimatedCompletionDate ?? null}
         remainingMd={derived?.remainingMd ?? 0}
         repoUrl={repoUrl}
-        prompt={prompt}
+        summary={summary}
         showCriticalPath={showCriticalPath}
         onToggleCriticalPath={hasDag ? () => setShowCriticalPath(!showCriticalPath) : undefined}
         onCalendar={() => { setCalendarOpen(!calendarOpen); setSelectedNodeId(null); setChatOpen(false); }}

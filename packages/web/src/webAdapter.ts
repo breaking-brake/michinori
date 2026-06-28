@@ -72,7 +72,7 @@ export function createWebAdapter(
         throw new Error(body.error ?? `HTTP ${res.status}`);
       }
 
-      const data = (await res.json()) as { nodes: DagNodeType[]; model: string };
+      const data = (await res.json()) as { summary: string; nodes: DagNodeType[]; model: string };
       const derived = computeCriticalPath(data.nodes, currentDag?.calendar);
       const now = new Date().toISOString();
 
@@ -81,6 +81,7 @@ export function createWebAdapter(
         metadata: {
           repoUrl,
           prompt,
+          summary: data.summary,
           generatedAt: currentDag?.metadata.generatedAt ?? now,
           updatedAt: now,
           model: data.model,
@@ -91,7 +92,7 @@ export function createWebAdapter(
       };
 
       saveDag(dag);
-      dispatch({ type: "dagUpdate", nodes: data.nodes, derived, repoUrl, prompt });
+      dispatch({ type: "dagUpdate", nodes: data.nodes, derived, repoUrl, prompt, summary: data.summary });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       dispatch({ type: "error", message });
@@ -207,7 +208,7 @@ export function createWebAdapter(
     onReady: () => {
       const dag = getDag();
       if (dag) {
-        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, repoUrl: dag.metadata.repoUrl, prompt: dag.metadata.prompt, calendar: dag.calendar });
+        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, repoUrl: dag.metadata.repoUrl, summary: dag.metadata.summary, calendar: dag.calendar });
       }
     },
     updateCalendar: (update) => {

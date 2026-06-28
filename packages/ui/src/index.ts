@@ -1,7 +1,7 @@
 export { DagApp } from "./DagApp";
 export { useDagMessages } from "./useDagMessages";
 export type { DagState } from "./useDagMessages";
-export type { DagAdapter, DagUpdate, DagMessage, ChatMessage } from "./types";
+export type { DagAdapter, DagUpdate, DagMessage, ChatMessage, QuotaInfo } from "./types";
 
 export { DagNode } from "./components/DagNode";
 export { Header } from "./components/Header";

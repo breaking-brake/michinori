@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { QuotaInfo } from "../types";
 
 const inputStyle = {
   padding: "6px 10px",
@@ -14,9 +15,10 @@ interface InputPanelProps {
   loading: boolean;
   defaultRepoUrl?: string;
   defaultPrompt?: string;
+  quota?: QuotaInfo | null;
 }
 
-export function InputPanel({ onSubmit, loading, defaultRepoUrl = "", defaultPrompt = "" }: InputPanelProps) {
+export function InputPanel({ onSubmit, loading, defaultRepoUrl = "", defaultPrompt = "", quota }: InputPanelProps) {
   const [repoUrl, setRepoUrl] = useState(defaultRepoUrl);
   const [prompt, setPrompt] = useState(defaultPrompt);
 
@@ -68,6 +70,11 @@ export function InputPanel({ onSubmit, loading, defaultRepoUrl = "", defaultProm
       >
         {loading ? "生成中..." : "DAGを生成"}
       </button>
+      {quota && !quota.isAdmin && quota.limit > 0 && (
+        <div style={{ fontSize: 11, opacity: 0.5, textAlign: "center" }}>
+          Demo版: 1日あたり{quota.limit}回まで利用可能
+        </div>
+      )}
     </div>
   );
 }

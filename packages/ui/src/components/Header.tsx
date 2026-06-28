@@ -1,3 +1,5 @@
+import type { QuotaInfo } from "../types";
+
 const headerBtnStyle = {
   padding: "4px 12px",
   background: "transparent",
@@ -19,9 +21,10 @@ interface HeaderProps {
   onLoad?: () => void;
   onCalendar?: () => void;
   onChat?: () => void;
+  quota?: QuotaInfo | null;
 }
 
-export function Header({ completionDate, remainingMd, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat }: HeaderProps) {
+export function Header({ completionDate, remainingMd, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota }: HeaderProps) {
   return (
     <div
       style={{
@@ -63,7 +66,18 @@ export function Header({ completionDate, remainingMd, showCriticalPath, onToggle
       ) : (
         <span style={{ opacity: 0.6 }}>DAGを生成してください</span>
       )}
-      <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+      <span style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
+        {quota && (
+          quota.isAdmin ? (
+            <span style={{ fontSize: 11, marginRight: 4, padding: "2px 8px", borderRadius: 4, background: "rgba(16, 185, 129, 0.2)", color: "#10b981" }}>
+              管理者モード
+            </span>
+          ) : quota.limit > 0 ? (
+            <span style={{ fontSize: 11, opacity: 0.6, marginRight: 4 }}>
+              残り {quota.remaining}/{quota.limit} 回
+            </span>
+          ) : null
+        )}
         {onChat && (
           <button onClick={onChat} style={{ ...headerBtnStyle, background: "var(--vscode-button-background, #0e639c)", color: "#fff", opacity: 1 }}>AI相談</button>
         )}

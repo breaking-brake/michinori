@@ -7,6 +7,9 @@ const EnvSchema = z.object({
   RATE_LIMIT_PER_IP: z.coerce.number().default(5),
   RATE_LIMIT_GLOBAL: z.coerce.number().default(30),
   GEO_BLOCK_ENABLED: z.coerce.boolean().default(true),
+  DAILY_QUOTA_LIMIT: z.coerce.number().default(100),
+  FIRESTORE_EMULATOR_HOST: z.string().optional(),
+  GOOGLE_CLOUD_PROJECT: z.string().default("michinori-local"),
 });
 
 function loadEnv() {

@@ -43,6 +43,7 @@ export function useDagMessages() {
           calendarPreset: msg.calendar?.preset ?? prev.calendarPreset,
           customDayOff: msg.calendar?.customDayOff ?? prev.customDayOff,
           customDayOn: msg.calendar?.customDayOn ?? prev.customDayOn,
+          ...(msg.nodes.length === 0 ? { chatMessages: [], chatLoading: false } : {}),
         }));
         break;
       case "loading":

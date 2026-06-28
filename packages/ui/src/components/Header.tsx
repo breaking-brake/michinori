@@ -38,7 +38,9 @@ export function Header({ completionDate, remainingMd, showCriticalPath, onToggle
         fontSize: 13,
       }}
     >
-      <span style={{ fontWeight: 700, fontSize: 15 }}>Michinori</span>
+      <span style={{ fontWeight: 700, fontSize: 15 }}>
+        Michinori{quota && !quota.isAdmin && <span style={{ fontWeight: 400, opacity: 0.5 }}>: Demo</span>}
+      </span>
       {completionDate ? (
         <>
           <span>
@@ -74,7 +76,7 @@ export function Header({ completionDate, remainingMd, showCriticalPath, onToggle
             </span>
           ) : quota.limit > 0 ? (
             <span style={{ fontSize: 11, opacity: 0.6, marginRight: 4 }}>
-              残り {quota.remaining}/{quota.limit} 回
+              リクエスト制限 残り {quota.remaining}/{quota.limit} 回
             </span>
           ) : null
         )}

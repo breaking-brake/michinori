@@ -72,7 +72,7 @@ export function InputPanel({ onSubmit, loading, defaultRepoUrl = "", defaultProm
       </button>
       {quota && !quota.isAdmin && quota.limit > 0 && (
         <div style={{ fontSize: 11, opacity: 0.5, textAlign: "center" }}>
-          Demo版: 1日あたり{quota.limit}回まで利用可能
+          サービス全体で1日あたり{quota.limit}回まで利用可能
         </div>
       )}
     </div>

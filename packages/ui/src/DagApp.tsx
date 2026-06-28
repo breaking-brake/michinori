@@ -25,7 +25,7 @@ import { LoadingOverlay } from "./components/LoadingOverlay";
 import { NodeDetailPanel } from "./components/NodeDetailPanel";
 import { CalendarPanel } from "./components/CalendarPanel";
 import { ProposalPreviewDialog } from "./components/ProposalPreviewDialog";
-import type { DagAdapter, DagMessage, ChatMessage } from "./types";
+import type { DagAdapter, DagMessage, ChatMessage, QuotaInfo } from "./types";
 import type { DagProposalType } from "@michinori/shared";
 import type { DagNodeType, DagDerivedType } from "@michinori/shared";
 
@@ -49,6 +49,7 @@ interface DagAppProps {
   chatLoading?: boolean;
   onDismissProposal?: () => void;
   onMarkProposalApplied?: () => void;
+  quota?: QuotaInfo | null;
 }
 
 function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }> {
@@ -104,7 +105,7 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false, onDismissProposal, onMarkProposalApplied }: DagAppProps) {
+function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false, onDismissProposal, onMarkProposalApplied, quota }: DagAppProps) {
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -230,6 +231,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         onToggleCriticalPath={hasDag ? () => setShowCriticalPath(!showCriticalPath) : undefined}
         onCalendar={() => { setCalendarOpen(!calendarOpen); setSelectedNodeId(null); setChatOpen(false); }}
         onChat={hasDag ? () => { setChatOpen(!chatOpen); setSelectedNodeId(null); setCalendarOpen(false); } : undefined}
+        quota={quota}
         onSave={() => adapter.save()}
         onLoad={() => adapter.load()}
         onReset={() => {
@@ -251,6 +253,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           loading={loading}
           defaultRepoUrl={defaultRepoUrl}
           defaultPrompt={defaultPrompt}
+          quota={quota}
         />
       )}
       <div style={{ flex: 1, position: "relative" }}>

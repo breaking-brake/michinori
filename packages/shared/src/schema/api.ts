@@ -64,6 +64,7 @@ export const ErrorResponse = z.object({
     "INVALID_REPO",
     "REPO_TOO_LARGE",
     "INTERNAL_ERROR",
+    "DAILY_QUOTA_EXCEEDED",
   ]),
 });
 export type ErrorResponse = z.infer<typeof ErrorResponse>;

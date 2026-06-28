@@ -1,8 +1,28 @@
-import type { DagAdapter, DagMessage, ChatMessage } from "@michinori/ui";
+import type { DagAdapter, DagMessage, ChatMessage, QuotaInfo } from "@michinori/ui";
 import type { DagNodeType, DagProposalType, MichinoriFileType } from "@michinori/shared";
 import { computeCriticalPath } from "@michinori/shared";
 
 const DAG_STORAGE = "michinori:dag";
+
+function parseQuotaHeaders(res: Response): QuotaInfo | null {
+  const limit = res.headers.get("X-Quota-Limit");
+  const remaining = res.headers.get("X-Quota-Remaining");
+  if (!limit) return null;
+  if (limit === "unlimited") return { limit: -1, used: 0, remaining: -1, isAdmin: true, resetsAt: null };
+  const l = parseInt(limit, 10);
+  const r = parseInt(remaining ?? "0", 10);
+  return { limit: l, used: l - r, remaining: r, isAdmin: false, resetsAt: "00:00 JST" };
+}
+
+export async function fetchQuota(endpoint: string): Promise<QuotaInfo | null> {
+  try {
+    const res = await fetch(`${endpoint}/quota`);
+    if (!res.ok) return null;
+    return (await res.json()) as QuotaInfo;
+  } catch {
+    return null;
+  }
+}
 const ENDPOINT_STORAGE = "michinori:endpoint";
 
 function getEndpoint(): string {
@@ -27,6 +47,7 @@ export function createWebAdapter(
   dispatch: (msg: DagMessage) => void,
   addUserChatMessage: (content: string) => void,
   getChatMessages: () => ChatMessage[],
+  onQuotaUpdate: (quota: QuotaInfo) => void,
 ): DagAdapter {
   async function callAnalyze(
     repoUrl: string,
@@ -42,6 +63,9 @@ export function createWebAdapter(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ repoUrl, prompt, currentDag }),
       });
+
+      const quota = parseQuotaHeaders(res);
+      if (quota) onQuotaUpdate(quota);
 
       if (!res.ok) {
         const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error: string };
@@ -248,6 +272,8 @@ export function createWebAdapter(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message, repoUrl: dag.metadata.repoUrl, conversationHistory: chatHistory, currentDag: dag }),
         });
+        const chatQuota = parseQuotaHeaders(res);
+        if (chatQuota) onQuotaUpdate(chatQuota);
         if (!res.ok) {
           const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error: string };
           throw new Error(body.error ?? `HTTP ${res.status}`);

@@ -1,12 +1,23 @@
-import { useCallback, useMemo } from "react";
-import { DagApp, useDagMessages } from "@michinori/ui";
-import { createWebAdapter } from "./webAdapter";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DagApp, useDagMessages, type QuotaInfo } from "@michinori/ui";
+import { createWebAdapter, fetchQuota } from "./webAdapter";
+
+const ENDPOINT_STORAGE = "michinori:endpoint";
+function getEndpoint(): string {
+  return localStorage.getItem(ENDPOINT_STORAGE) ?? "http://localhost:8080";
+}
 
 export default function App() {
   const { state, dispatch, addUserChatMessage, dismissProposal, markProposalApplied } = useDagMessages();
+  const [quota, setQuota] = useState<QuotaInfo | null>(null);
+
+  useEffect(() => {
+    fetchQuota(getEndpoint()).then((q) => { if (q) setQuota(q); });
+  }, []);
+
   const getChatMessages = useCallback(() => state.chatMessages, [state.chatMessages]);
   const adapter = useMemo(
-    () => createWebAdapter(dispatch, addUserChatMessage, getChatMessages),
+    () => createWebAdapter(dispatch, addUserChatMessage, getChatMessages, setQuota),
     [dispatch, addUserChatMessage, getChatMessages],
   );
 
@@ -28,6 +39,7 @@ export default function App() {
       chatLoading={state.chatLoading}
       onDismissProposal={dismissProposal}
       onMarkProposalApplied={markProposalApplied}
+      quota={quota}
     />
   );
 }

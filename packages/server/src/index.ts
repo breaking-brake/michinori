@@ -5,12 +5,16 @@ import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { geoBlock } from "./middleware/geoBlock.js";
+import { dailyQuota } from "./middleware/dailyQuota.js";
 import { analyze } from "./routes/analyze.js";
 import { chat } from "./routes/chat.js";
+import { createQuotaRoute } from "./routes/quota.js";
 
 const app = new Hono();
 
-app.use("*", cors());
+app.use("*", cors({
+  exposeHeaders: ["X-Quota-Limit", "X-Quota-Remaining"],
+}));
 
 app.get("/health", (c) =>
   c.json({ status: "ok", timestamp: new Date().toISOString() }),
@@ -22,7 +26,12 @@ app.get("/", (c) =>
   c.json({ name: "michinori", status: "ok" }),
 );
 
+app.route("/quota", createQuotaRoute(env.DAILY_QUOTA_LIMIT));
+
 app.use("/analyze/*", rateLimit({ perIp: env.RATE_LIMIT_PER_IP, global: env.RATE_LIMIT_GLOBAL }));
+app.use("/analyze/*", dailyQuota(env.DAILY_QUOTA_LIMIT));
+app.use("/chat/*", dailyQuota(env.DAILY_QUOTA_LIMIT));
+
 app.route("/analyze", analyze);
 app.route("/chat", chat);
 

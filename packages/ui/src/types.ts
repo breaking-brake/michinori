@@ -19,6 +19,14 @@ export interface DagAdapter {
   load(): void;
 }
 
+export interface QuotaInfo {
+  limit: number;
+  used: number;
+  remaining: number;
+  isAdmin: boolean;
+  resetsAt: string | null;
+}
+
 export interface DagUpdate {
   nodes: DagNodeType[];
   derived: DagDerivedType;

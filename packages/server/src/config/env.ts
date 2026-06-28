@@ -7,6 +7,7 @@ const EnvSchema = z.object({
   RATE_LIMIT_PER_IP: z.coerce.number().default(5),
   RATE_LIMIT_GLOBAL: z.coerce.number().default(30),
   GEO_BLOCK_ENABLED: z.coerce.boolean().default(true),
+  DAILY_QUOTA_LIMIT: z.coerce.number().default(100),
 });
 
 function loadEnv() {

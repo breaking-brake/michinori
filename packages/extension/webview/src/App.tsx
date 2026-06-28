@@ -82,7 +82,7 @@ export default function App() {
       loading={state.loading}
       error={state.error}
       hasDag={state.hasDag}
-      defaultPrompt="QwenCodeを対応プラットフォームとして追加したい"
+      defaultPrompt="docs/devops-ai-agent-hackathon.md のハッカソンに入稿するまでのタスクを整理して"
       calendarPreset={state.calendarPreset}
       customDayOff={state.customDayOff}
       customDayOn={state.customDayOn}

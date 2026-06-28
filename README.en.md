@@ -18,7 +18,7 @@ Just enter a GitHub repository URL and describe what you want to accomplish. AI 
 
 - **See the full picture** — AI analyzes the codebase and structures what to do and in what order
 - **Know when it's done** — Completion date auto-calculated from the critical path on business days, updated instantly on status change
-- **Refine with AI** — Chat to propose DAG changes → preview → approve, a safe workflow
+- **Refine with AI** — Chat to propose DAG changes → preview → approve, a safe workflow. AI can investigate your repository's source code to autonomously determine task completion status
 - **Edit freely by hand** — Add/remove nodes, change connections, edit estimates, categories, and statuses
 - **Customize working days** — Holiday-aware calendar with weekday/weekend work presets
 - **Save and share** — Export/import as `.michinori.json` files

@@ -38,6 +38,7 @@ export type DagProposal = z.infer<typeof DagProposal>;
 
 export const ChatRequest = z.object({
   message: z.string().min(1).max(2000),
+  repoUrl: z.string().url().startsWith("https://github.com/").optional(),
   conversationHistory: z.array(z.object({
     role: ChatMessageRole,
     content: z.string(),

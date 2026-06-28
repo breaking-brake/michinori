@@ -3,6 +3,7 @@ import { AnalyzeRequest } from "@michinori/shared";
 import { logger } from "../utils/logger.js";
 import { cloneRepo } from "../services/cloner.js";
 import { collectFiles, buildFileTreeString, buildCodeContext } from "../services/fileTree.js";
+import { cacheRepoFiles } from "../services/repoCache.js";
 import { buildPrompt } from "../prompts/dagPrompt.js";
 import { generateDag } from "../services/gemini.js";
 
@@ -31,6 +32,7 @@ analyze.post("/", async (c) => {
 
   try {
     const files = await collectFiles(cloneResult.dir);
+    cacheRepoFiles(repoUrl, files);
 
     if (files.length === 0) {
       return c.json({ error: "Repository appears empty", code: "INVALID_REPO" as const }, 400);

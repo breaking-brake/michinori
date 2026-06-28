@@ -23,6 +23,8 @@
 │                                                   │
 │  POST /chat ── AIアシスタント (tool-use)           │
 │    会話 + DAG → Gemini → 提案 → ユーザー承認      │
+│    リポジトリ調査ツール (list_files/read_file/     │
+│    search_code) で自律的にコードを確認             │
 │                                                   │
 │  Middleware: Rate Limit / Geo Block               │
 └───────────────────────────────────────────────────┘
@@ -69,3 +71,4 @@ packages/
 - `.michinori.json` is the single source of truth
 - Status/Category definitions live in `packages/shared/src/schema/dag.ts` (single source — adding a new value there propagates to Zod, Gemini prompt, responseSchema, UI colors, and dropdowns)
 - API key is server-side only (`GEMINI_API_KEY` in `.env`), never sent from clients
+- Repo code context is cached in-memory (30min TTL) from `/analyze`, reused by `/chat` for repo investigation tools

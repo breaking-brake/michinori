@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const STATUS_DEFINITIONS = [
-  { value: "未着手", description: "not started", color: "#6b7280" },
-  { value: "進行中", description: "in progress", color: "#3b82f6" },
-  { value: "PR Open", description: "pull request open, awaiting review", color: "#f59e0b" },
-  { value: "完了", description: "done", color: "#10b981" },
+  { value: "未着手", description: "not started — no work has begun", color: "#6b7280" },
+  { value: "進行中", description: "in progress — actively being worked on", color: "#3b82f6" },
+  { value: "PR Open", description: "a Pull Request has actually been opened on GitHub. Do NOT use this for 'almost done' tasks — only when a real PR exists", color: "#f59e0b" },
+  { value: "完了", description: "done — the work is fully completed or merged", color: "#10b981" },
 ] as const;
 
 export const CATEGORY_DEFINITIONS = [

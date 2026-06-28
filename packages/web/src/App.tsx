@@ -19,8 +19,8 @@ export default function App() {
       loading={state.loading}
       error={state.error}
       hasDag={state.hasDag}
-      defaultRepoUrl={import.meta.env.DEV ? "https://github.com/breaking-brake/cc-wf-studio" : undefined}
-      defaultPrompt="QwenCodeを対応プラットフォームとして追加したい"
+      defaultRepoUrl={import.meta.env.DEV ? "https://github.com/breaking-brake/michinori" : undefined}
+      defaultPrompt="docs/devops-ai-agent-hackathon.md のハッカソンに入稿するまでのタスクを整理して"
       calendarPreset={state.calendarPreset}
       customDayOff={state.customDayOff}
       customDayOn={state.customDayOn}

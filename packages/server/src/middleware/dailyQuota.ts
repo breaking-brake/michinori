@@ -1,7 +1,29 @@
 import type { MiddlewareHandler } from "hono";
 import { logger } from "../utils/logger.js";
-import { getUsage, incrementUsage } from "../services/quotaStore.js";
 import { env } from "../config/env.js";
+
+let dailyCount = 0;
+let currentDateKey = "";
+
+function getJstDateKey(): string {
+  const now = new Date();
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return jst.toISOString().slice(0, 10);
+}
+
+function getCount(): number {
+  const dateKey = getJstDateKey();
+  if (dateKey !== currentDateKey) {
+    currentDateKey = dateKey;
+    dailyCount = 0;
+  }
+  return dailyCount;
+}
+
+function increment(): number {
+  getCount();
+  return ++dailyCount;
+}
 
 function isDev(): boolean {
   return env.NODE_ENV === "development";
@@ -24,7 +46,7 @@ export function dailyQuota(limit: number): MiddlewareHandler {
       return;
     }
 
-    const used = await getUsage();
+    const used = getCount();
 
     if (used >= limit) {
       const retryAfter = getSecondsUntilJstMidnight();
@@ -42,17 +64,17 @@ export function dailyQuota(limit: number): MiddlewareHandler {
 
     await next();
 
-    const newCount = await incrementUsage();
+    const newCount = increment();
     c.header("X-Quota-Limit", String(limit));
     c.header("X-Quota-Remaining", String(Math.max(0, limit - newCount)));
   };
 }
 
-export async function getQuotaInfo(limit: number) {
+export function getQuotaInfo(limit: number) {
   if (isDev()) {
     return { limit: -1, used: 0, remaining: -1, isAdmin: true, resetsAt: null };
   }
-  const used = await getUsage();
+  const used = getCount();
   return {
     limit,
     used,

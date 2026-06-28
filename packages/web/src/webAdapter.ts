@@ -246,7 +246,7 @@ export function createWebAdapter(
         const res = await fetch(`${endpoint}/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message, conversationHistory: chatHistory, currentDag: dag }),
+          body: JSON.stringify({ message, repoUrl: dag.metadata.repoUrl, conversationHistory: chatHistory, currentDag: dag }),
         });
         if (!res.ok) {
           const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error: string };

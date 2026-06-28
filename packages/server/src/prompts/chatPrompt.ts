@@ -1,6 +1,8 @@
 import { CATEGORY_DEFINITIONS, STATUS_DEFINITIONS } from "@michinori/shared";
 import type { MichinoriFileType } from "@michinori/shared";
 
+const MAX_TOOL_ROUNDS = 8;
+
 const categoryList = CATEGORY_DEFINITIONS
   .map((c) => `"${c.value}" (${c.description})`)
   .join(", ");
@@ -40,6 +42,12 @@ ${repoSection}
 - status: ${statusList}
 - estimateMd: 工数（人日）、0.1刻み
 - dependencies: 先行タスクのID配列
+
+## ツール使用の制約
+- リポジトリ調査ツールの呼び出しは**最大${MAX_TOOL_ROUNDS}回まで**です。それを超えるとあなたの応答は途切れます
+- 必要なファイルを効率的に特定し、少ないラウンドで調査を完了してください
+- 3回以内で調査を終え、残りのラウンドは回答生成に使ってください
+- 1回の呼び出しで複数の情報を得られる場合はそうしてください（例: search_codeで広く探してからread_fileで詳細確認）
 
 ## ルール
 - 日本語で応答してください

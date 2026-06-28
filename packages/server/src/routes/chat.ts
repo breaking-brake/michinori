@@ -8,7 +8,7 @@ import type { FileEntry } from "../services/fileTree.js";
 import { logger } from "../utils/logger.js";
 
 const MODEL = "gemini-2.5-flash";
-const MAX_TOOL_ROUNDS = 5;
+const MAX_TOOL_ROUNDS = 8;
 
 const proposeDagChangesTool: FunctionDeclaration = {
   name: "propose_dag_changes",
@@ -233,6 +233,8 @@ chat.post("/", async (c) => {
           { role: "model" as const, parts },
           { role: "user" as const, parts: functionResponses },
         );
+
+        if (textParts) responseMessage = textParts;
         continue;
       }
 
@@ -241,7 +243,19 @@ chat.post("/", async (c) => {
     }
 
     if (!responseMessage) {
-      responseMessage = "すみません、応答を生成できませんでした。もう一度お試しください。";
+      logger.info("chat:finalRound", { reason: "max tool rounds exhausted, requesting text-only response" });
+      const finalResponse = await ai.models.generateContent({
+        model: MODEL,
+        contents,
+        config: {
+          systemInstruction,
+          temperature: 0.7,
+        },
+      });
+      responseMessage = finalResponse.candidates?.[0]?.content?.parts
+        ?.filter((p) => p.text)
+        .map((p) => p.text)
+        .join("") ?? "すみません、応答を生成できませんでした。もう一度お試しください。";
     }
 
     logger.info("chat:done", { hasProposal: !!proposal, messageLength: responseMessage.length });

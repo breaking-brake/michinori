@@ -11,5 +11,6 @@ export { LoadingOverlay } from "./components/LoadingOverlay";
 export { NodeDetailPanel } from "./components/NodeDetailPanel";
 export { CalendarPanel } from "./components/CalendarPanel";
 export { DeletableEdge } from "./components/DeletableEdge";
+export { Legend } from "./components/Legend";
 export { ProposalPreviewDialog } from "./components/ProposalPreviewDialog";
 export { applyProposalToNodes } from "./applyProposal";

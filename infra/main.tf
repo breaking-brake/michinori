@@ -5,6 +5,7 @@ locals {
     "cloudbuild.googleapis.com",
     "iam.googleapis.com",
     "iamcredentials.googleapis.com",
+    "secretmanager.googleapis.com",
   ]
 }
 
@@ -28,4 +29,20 @@ resource "google_artifact_registry_repository" "main" {
 resource "google_service_account" "cloudrun" {
   account_id   = "michinori-cloudrun"
   display_name = "Michinori Cloud Run"
+}
+
+resource "google_secret_manager_secret" "gemini_api_key" {
+  secret_id = "gemini-api-key"
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.apis]
+}
+
+resource "google_secret_manager_secret_iam_member" "cloudrun_accessor" {
+  secret_id = google_secret_manager_secret.gemini_api_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cloudrun.email}"
 }

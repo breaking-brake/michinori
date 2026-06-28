@@ -44,4 +44,4 @@ jobs:
           gcloud run deploy ${{ env.SERVICE }} \
             --image "${IMAGE}" \
             --region ${{ env.REGION }} \
-            --set-env-vars "NODE_ENV=production,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},GEO_BLOCK_ENABLED=true,DAILY_QUOTA_LIMIT=100"
+            --set-env-vars "NODE_ENV=production,GEO_BLOCK_ENABLED=true,DAILY_QUOTA_LIMIT=100"

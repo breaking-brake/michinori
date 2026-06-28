@@ -25,7 +25,7 @@ export async function fetchQuota(endpoint: string): Promise<QuotaInfo | null> {
 }
 const ENDPOINT_STORAGE = "michinori:endpoint";
 
-function getEndpoint(): string {
+export function getEndpoint(): string {
   return localStorage.getItem(ENDPOINT_STORAGE) ?? (import.meta.env.DEV ? "http://localhost:8080" : "");
 }
 
@@ -91,7 +91,7 @@ export function createWebAdapter(
       };
 
       saveDag(dag);
-      dispatch({ type: "dagUpdate", nodes: data.nodes, derived });
+      dispatch({ type: "dagUpdate", nodes: data.nodes, derived, repoUrl, prompt });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       dispatch({ type: "error", message });
@@ -207,7 +207,7 @@ export function createWebAdapter(
     onReady: () => {
       const dag = getDag();
       if (dag) {
-        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
+        dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, repoUrl: dag.metadata.repoUrl, prompt: dag.metadata.prompt, calendar: dag.calendar });
       }
     },
     updateCalendar: (update) => {

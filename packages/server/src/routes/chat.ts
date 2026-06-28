@@ -8,7 +8,7 @@ import type { FileEntry } from "../services/fileTree.js";
 import { logger } from "../utils/logger.js";
 
 const MODEL = "gemini-2.5-flash";
-const MAX_TOOL_ROUNDS = 5;
+const MAX_TOOL_ROUNDS = 8;
 
 const proposeDagChangesTool: FunctionDeclaration = {
   name: "propose_dag_changes",

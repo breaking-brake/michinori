@@ -1,7 +1,7 @@
 import { CATEGORY_DEFINITIONS, STATUS_DEFINITIONS } from "@michinori/shared";
 import type { MichinoriFileType } from "@michinori/shared";
 
-const MAX_TOOL_ROUNDS = 5;
+const MAX_TOOL_ROUNDS = 8;
 
 const categoryList = CATEGORY_DEFINITIONS
   .map((c) => `"${c.value}" (${c.description})`)

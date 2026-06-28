@@ -2,10 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { DagApp, useDagMessages, type QuotaInfo } from "@michinori/ui";
 import { createWebAdapter, fetchQuota } from "./webAdapter";
 
-const ENDPOINT_STORAGE = "michinori:endpoint";
-function getEndpoint(): string {
-  return localStorage.getItem(ENDPOINT_STORAGE) ?? "http://localhost:8080";
-}
+import { getEndpoint } from "./webAdapter";
 
 export default function App() {
   const { state, dispatch, addUserChatMessage, dismissProposal, markProposalApplied } = useDagMessages();
@@ -30,7 +27,9 @@ export default function App() {
       loading={state.loading}
       error={state.error}
       hasDag={state.hasDag}
-      defaultRepoUrl={import.meta.env.DEV ? "https://github.com/breaking-brake/michinori" : undefined}
+      repoUrl={state.repoUrl}
+      summary={state.summary}
+      defaultRepoUrl="https://github.com/breaking-brake/michinori"
       defaultPrompt="docs/devops-ai-agent-hackathon.md のハッカソンに入稿するまでのタスクを整理して"
       calendarPreset={state.calendarPreset}
       customDayOff={state.customDayOff}

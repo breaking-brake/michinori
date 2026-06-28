@@ -9,6 +9,7 @@ export const AnalyzeRequest = z.object({
 export type AnalyzeRequest = z.infer<typeof AnalyzeRequest>;
 
 export const AnalyzeResponse = z.object({
+  summary: z.string(),
   nodes: z.array(DagNode),
   model: z.string(),
 });

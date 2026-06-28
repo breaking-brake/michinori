@@ -8,6 +8,9 @@ export interface DagState {
   loading: boolean;
   error: string | null;
   hasDag: boolean;
+  repoUrl: string;
+  prompt: string;
+  summary: string;
   calendarPreset: string;
   customDayOff: string[];
   customDayOn: string[];
@@ -21,6 +24,9 @@ const INITIAL_STATE: DagState = {
   loading: false,
   error: null,
   hasDag: false,
+  repoUrl: "",
+  prompt: "",
+  summary: "",
   calendarPreset: "weekday",
   customDayOff: [],
   customDayOn: [],
@@ -40,6 +46,9 @@ export function useDagMessages() {
           derived: msg.derived,
           hasDag: msg.nodes.length > 0,
           error: null,
+          repoUrl: msg.repoUrl ?? prev.repoUrl,
+          prompt: msg.prompt ?? prev.prompt,
+          summary: msg.summary ?? prev.summary,
           calendarPreset: msg.calendar?.preset ?? prev.calendarPreset,
           customDayOff: msg.calendar?.customDayOff ?? prev.customDayOff,
           customDayOn: msg.calendar?.customDayOn ?? prev.customDayOn,

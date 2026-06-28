@@ -8,6 +8,7 @@ const MODEL = "gemini-2.5-flash";
 const responseSchema = {
   type: Type.OBJECT,
   properties: {
+    summary: { type: Type.STRING },
     nodes: {
       type: Type.ARRAY,
       items: {
@@ -25,10 +26,11 @@ const responseSchema = {
       },
     },
   },
-  required: ["nodes"],
+  required: ["summary", "nodes"],
 };
 
 export interface GenerateDagResult {
+  summary: string;
   nodes: Array<ReturnType<typeof DagNode.parse>>;
   model: string;
 }
@@ -55,13 +57,13 @@ export async function generateDag(
   const text = response.text ?? "";
   logger.info("gemini:response", { responseLength: text.length });
 
-  const parsed = JSON.parse(text) as { nodes: unknown[] };
+  const parsed = JSON.parse(text) as { summary: string; nodes: unknown[] };
 
   const nodes = parsed.nodes.map((n) => DagNode.parse(n));
 
   validateDag(nodes);
 
-  return { nodes, model: MODEL };
+  return { summary: parsed.summary, nodes, model: MODEL };
 }
 
 function validateDag(nodes: Array<ReturnType<typeof DagNode.parse>>): void {

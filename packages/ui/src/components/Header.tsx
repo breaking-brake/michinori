@@ -14,6 +14,8 @@ const headerBtnStyle = {
 interface HeaderProps {
   completionDate: string | null;
   remainingMd: number;
+  repoUrl?: string;
+  summary?: string;
   showCriticalPath?: boolean;
   onToggleCriticalPath?: () => void;
   onReset?: () => void;
@@ -24,17 +26,21 @@ interface HeaderProps {
   quota?: QuotaInfo | null;
 }
 
-export function Header({ completionDate, remainingMd, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota }: HeaderProps) {
+export function Header({ completionDate, remainingMd, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota }: HeaderProps) {
   return (
     <div
       style={{
-        padding: "8px 16px",
         borderBottom: "1px solid var(--vscode-panel-border, #444)",
+        background: "var(--vscode-sideBar-background, #252526)",
+        color: "var(--vscode-foreground, #ccc)",
+      }}
+    >
+    <div
+      style={{
+        padding: "8px 16px",
         display: "flex",
         alignItems: "center",
         gap: 16,
-        background: "var(--vscode-sideBar-background, #252526)",
-        color: "var(--vscode-foreground, #ccc)",
         fontSize: 13,
       }}
     >
@@ -93,6 +99,26 @@ export function Header({ completionDate, remainingMd, showCriticalPath, onToggle
           <button onClick={onReset} style={headerBtnStyle}>リセット</button>
         )}
       </span>
+    </div>
+    {completionDate && repoUrl && (
+      <div
+        style={{
+          padding: "4px 16px 6px",
+          fontSize: 11,
+          opacity: 0.6,
+          display: "flex",
+          gap: 16,
+          overflow: "hidden",
+        }}
+      >
+        <span style={{ flexShrink: 0 }}>{repoUrl}</span>
+        {summary && (
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {summary}
+          </span>
+        )}
+      </div>
+    )}
     </div>
   );
 }

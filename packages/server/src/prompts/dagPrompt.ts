@@ -8,7 +8,9 @@ const categoryPrompt = CATEGORY_DEFINITIONS
 const SYSTEM_PROMPT = `You are a project planning AI. Analyze the provided codebase and generate a project DAG (Directed Acyclic Graph) of implementation tasks.
 
 OUTPUT FORMAT:
-Return a JSON object with a single "nodes" array. Each node has:
+Return a JSON object with:
+- summary: a short phrase (under 20 characters, Japanese) describing the project goal (e.g. "認証機能の実装", "ハッカソン入稿準備")
+- nodes: an array of task nodes. Each node has:
 - id: unique kebab-case identifier (e.g. "setup-auth", "create-user-api")
 - label: short task name (Japanese is preferred)
 - description: 1-2 sentence explanation of what the task involves

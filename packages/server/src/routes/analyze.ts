@@ -46,7 +46,7 @@ analyze.post("/", async (c) => {
 
     logger.info("analyze:done", { repoUrl, nodeCount: result.nodes.length });
 
-    return c.json({ nodes: result.nodes, model: result.model });
+    return c.json({ summary: result.summary, nodes: result.nodes, model: result.model });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.error("analyze:error", { repoUrl, error: message });

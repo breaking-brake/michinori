@@ -41,7 +41,7 @@ export interface ChatMessage {
 }
 
 export type DagMessage =
-  | { type: "dagUpdate"; nodes: DagNodeType[]; derived: DagDerivedType; calendar?: { preset: string; customDayOff: string[]; customDayOn: string[] } }
+  | { type: "dagUpdate"; nodes: DagNodeType[]; derived: DagDerivedType; repoUrl?: string; prompt?: string; summary?: string; calendar?: { preset: string; customDayOff: string[]; customDayOn: string[] } }
   | { type: "loading"; loading: boolean }
   | { type: "error"; message: string }
   | { type: "chatResponse"; message: string; proposal?: DagProposalType }

@@ -14,3 +14,21 @@ variable "container_image" {
   type        = string
   default     = ""
 }
+
+variable "gemini_api_key" {
+  description = "Gemini API key for Cloud Run"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_owner" {
+  description = "GitHub repository owner"
+  type        = string
+  default     = "breaking-brake"
+}
+
+variable "github_repo" {
+  description = "GitHub repository name"
+  type        = string
+  default     = "michinori"
+}

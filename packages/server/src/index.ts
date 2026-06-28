@@ -1,4 +1,5 @@
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { env } from "./config/env.js";
@@ -22,10 +23,6 @@ app.get("/health", (c) =>
 
 app.use("*", geoBlock(env.GEO_BLOCK_ENABLED));
 
-app.get("/", (c) =>
-  c.json({ name: "michinori", status: "ok" }),
-);
-
 app.route("/quota", createQuotaRoute(env.DAILY_QUOTA_LIMIT));
 
 app.use("/analyze/*", rateLimit({ perIp: env.RATE_LIMIT_PER_IP, global: env.RATE_LIMIT_GLOBAL }));
@@ -34,6 +31,9 @@ app.use("/chat/*", dailyQuota(env.DAILY_QUOTA_LIMIT));
 
 app.route("/analyze", analyze);
 app.route("/chat", chat);
+
+app.use("/*", serveStatic({ root: "../../public" }));
+app.get("/*", serveStatic({ root: "../../public", path: "index.html" }));
 
 logger.info("server:start", { port: env.PORT });
 

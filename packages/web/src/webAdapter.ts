@@ -26,7 +26,7 @@ export async function fetchQuota(endpoint: string): Promise<QuotaInfo | null> {
 const ENDPOINT_STORAGE = "michinori:endpoint";
 
 function getEndpoint(): string {
-  return localStorage.getItem(ENDPOINT_STORAGE) ?? "http://localhost:8080";
+  return localStorage.getItem(ENDPOINT_STORAGE) ?? (import.meta.env.DEV ? "http://localhost:8080" : "");
 }
 
 function getDag(): MichinoriFileType | null {

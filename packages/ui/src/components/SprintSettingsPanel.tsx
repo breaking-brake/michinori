@@ -20,7 +20,6 @@ interface SprintSettingsPanelProps {
 
 export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, onSprintDaysChange }: SprintSettingsPanelProps) {
   const [vStr, setVStr] = useState(String(velocity));
-  const [dStr, setDStr] = useState(String(sprintDays));
 
   return (
     <div
@@ -53,15 +52,21 @@ export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, on
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <span style={{ fontSize: 10, opacity: 0.5 }}>Sprint期間</span>
-          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <input
-              type="number" min="1" step="1" value={dStr}
-              onChange={(e) => setDStr(e.target.value)}
-              onBlur={() => { const d = parseInt(dStr) || 1; setDStr(String(d)); onSprintDaysChange(d); }}
-              style={smallInput}
-            />
-            <span style={{ opacity: 0.5 }}>稼働日</span>
-          </span>
+          <select
+            value={sprintDays}
+            onChange={(e) => onSprintDaysChange(parseInt(e.target.value))}
+            style={{
+              ...smallInput,
+              width: "auto",
+              cursor: "pointer",
+              padding: "2px 6px",
+            }}
+          >
+            <option value="5">1週間 (5日)</option>
+            <option value="10">2週間 (10日)</option>
+            <option value="15">3週間 (15日)</option>
+            <option value="20">4週間 (20日)</option>
+          </select>
         </div>
       </div>
     </div>

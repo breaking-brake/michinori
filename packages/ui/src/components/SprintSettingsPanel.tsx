@@ -36,7 +36,7 @@ export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, on
         boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
       }}
     >
-      <div style={{ fontWeight: 600, fontSize: 11, opacity: 0.7 }}>Sprint 設定</div>
+      <div style={{ fontWeight: 600, fontSize: 13, opacity: 0.8 }}>Sprint 設定</div>
       <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <span style={{ fontSize: 12, opacity: 0.7 }}>Velocity (SP/Sprint)</span>

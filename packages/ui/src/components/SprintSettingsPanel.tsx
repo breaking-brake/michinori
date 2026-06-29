@@ -1,14 +1,14 @@
 import { useState } from "react";
 
-const smallInput = {
-  width: 48,
-  padding: "2px 4px",
-  fontSize: 12,
-  textAlign: "center" as const,
+const fieldStyle = {
+  padding: "4px 6px",
+  fontSize: 13,
   background: "var(--vscode-input-background, #3c3c3c)",
   color: "var(--vscode-input-foreground, #ccc)",
   border: "1px solid var(--vscode-input-border, #555)",
   borderRadius: 3,
+  height: 28,
+  boxSizing: "border-box" as const,
 };
 
 interface SprintSettingsPanelProps {
@@ -45,7 +45,7 @@ export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, on
               type="number" min="1" step="1" value={vStr}
               onChange={(e) => setVStr(e.target.value)}
               onBlur={() => { const v = parseInt(vStr) || 1; setVStr(String(v)); onVelocityChange(v); }}
-              style={smallInput}
+              style={{ ...fieldStyle, width: 52, textAlign: "center" as const }}
             />
             <span style={{ opacity: 0.5 }}>SP/Sprint</span>
           </span>
@@ -55,12 +55,7 @@ export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, on
           <select
             value={sprintDays}
             onChange={(e) => onSprintDaysChange(parseInt(e.target.value))}
-            style={{
-              ...smallInput,
-              width: "auto",
-              cursor: "pointer",
-              padding: "2px 6px",
-            }}
+            style={{ ...fieldStyle, width: "auto", cursor: "pointer" }}
           >
             <option value="5">1週間 (5日)</option>
             <option value="10">2週間 (10日)</option>

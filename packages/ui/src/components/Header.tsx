@@ -57,8 +57,23 @@ export function Header({ completionDate, remaining, repoUrl, summary, showCritic
             完了予定: <strong>{completionDate}</strong>
           </span>
           {estimateMode === "sp" ? (
-            <span style={{ fontSize: 12, opacity: 0.6 }}>
-              残り {totalEstimate}SP ÷ {velocity}SP/Sprint = {Math.ceil(totalEstimate / (velocity || 1))}スプリント
+            <span style={{ fontSize: 12, opacity: 0.6, display: "inline-flex", alignItems: "center", gap: 4 }}>
+              残り {Math.ceil(totalEstimate / (velocity || 1))}スプリント
+              <span
+                title={`${totalEstimate}SP ÷ ${velocity}SP/Sprint = ${Math.ceil(totalEstimate / (velocity || 1))}スプリント`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  border: "1px solid var(--vscode-panel-border, #555)",
+                  fontSize: 10,
+                  cursor: "help",
+                  opacity: 0.6,
+                }}
+              >?</span>
             </span>
           ) : (
             <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>

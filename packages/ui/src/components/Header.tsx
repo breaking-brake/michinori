@@ -1,5 +1,25 @@
 import type { QuotaInfo } from "../types";
 
+function HelpBadge({ title }: { title: string }) {
+  return (
+    <span
+      title={title}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 16,
+        height: 16,
+        borderRadius: "50%",
+        border: "1px solid var(--vscode-panel-border, #555)",
+        fontSize: 10,
+        cursor: "help",
+        opacity: 0.6,
+      }}
+    >?</span>
+  );
+}
+
 const headerBtnStyle = {
   padding: "4px 12px",
   background: "transparent",
@@ -53,36 +73,31 @@ export function Header({ completionDate, remaining, repoUrl, summary, showCritic
       </span>
       {completionDate ? (
         <>
-          <span>
-            完了予定: <strong>{estimateMode === "sp" && velocity <= 0 ? "-" : completionDate}</strong>
-          </span>
-          {estimateMode === "sp" ? (
-            <span style={{ fontSize: 12, opacity: 0.6, display: "inline-flex", alignItems: "center", gap: 4 }}>
-              {velocity > 0 ? (
-                <>残り {Math.ceil(totalEstimate / velocity)}スプリント</>
-              ) : (
-                <>残り {totalEstimate}SP</>
-              )}
-              <span
-                title={velocity > 0
-                  ? `${totalEstimate}SP ÷ ${velocity}SP/Sprint = ${Math.ceil(totalEstimate / velocity)}スプリント`
-                  : "Sprint設定のVelocityを入力すると完了予定日が算出されます"}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  border: "1px solid var(--vscode-panel-border, #555)",
-                  fontSize: 10,
-                  cursor: "help",
-                  opacity: 0.6,
-                }}
-              >?</span>
-            </span>
+          {estimateMode === "sp" && velocity <= 0 ? (
+            <>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                完了予定: <strong>-</strong>
+                <HelpBadge title="Sprint設定のVelocityを入力すると完了予定日が算出されます" />
+              </span>
+              <span style={{ fontSize: 12, opacity: 0.6 }}>残り {totalEstimate}SP</span>
+            </>
+          ) : estimateMode === "sp" ? (
+            <>
+              <span>
+                完了予定: <strong>{completionDate}</strong>
+              </span>
+              <span style={{ fontSize: 12, opacity: 0.6, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                残り {Math.ceil(totalEstimate / velocity)}スプリント
+                <HelpBadge title={`${totalEstimate}SP ÷ ${velocity}SP/Sprint = ${Math.ceil(totalEstimate / velocity)}スプリント`} />
+              </span>
+            </>
           ) : (
-            <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>
+            <>
+              <span>
+                完了予定: <strong>{completionDate}</strong>
+              </span>
+              <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>
+            </>
           )}
           {onCalendar && (
             <button onClick={onCalendar} style={headerBtnStyle}>稼働日設定</button>

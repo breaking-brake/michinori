@@ -48,7 +48,7 @@ function LineIndicator({ color, dashed }: { color: string; dashed?: boolean }) {
   );
 }
 
-export function Legend({ showCriticalPath = false }: { showCriticalPath?: boolean }) {
+export function Legend({ showCriticalPath = false, estimateMode = "md" }: { showCriticalPath?: boolean; estimateMode?: string }) {
   return (
     <div
       style={{
@@ -85,7 +85,7 @@ export function Legend({ showCriticalPath = false }: { showCriticalPath?: boolea
         ))}
       </div>
 
-      <div>
+      <div style={sectionStyle}>
         <div style={titleStyle}>カテゴリ</div>
         {CATEGORY_DEFINITIONS.map((c) => (
           <div key={c.value} style={itemStyle}>
@@ -93,6 +93,23 @@ export function Legend({ showCriticalPath = false }: { showCriticalPath?: boolea
             <span>{c.value}</span>
           </div>
         ))}
+      </div>
+
+      <div>
+        <div style={titleStyle}>残り工数の計算</div>
+        {estimateMode === "sp" ? (
+          <>
+            <div style={itemStyle}><span>完了 → 0</span></div>
+            <div style={itemStyle}><span>それ以外 → 全量SP</span></div>
+          </>
+        ) : (
+          <>
+            <div style={itemStyle}><span>完了 → 0%</span></div>
+            <div style={itemStyle}><span>PR Open → 30%</span></div>
+            <div style={itemStyle}><span>進行中 → 50%</span></div>
+            <div style={itemStyle}><span>未着手 → 100%</span></div>
+          </>
+        )}
       </div>
     </div>
   );

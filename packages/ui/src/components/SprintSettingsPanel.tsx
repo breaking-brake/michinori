@@ -39,7 +39,7 @@ export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, on
       <div style={{ fontWeight: 600, fontSize: 11, opacity: 0.7 }}>Sprint 設定</div>
       <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span style={{ fontSize: 10, opacity: 0.5 }}>Velocity (SP/Sprint)</span>
+          <span style={{ fontSize: 12, opacity: 0.7 }}>Velocity (SP/Sprint)</span>
           <input
             type="number" min="1" step="1" value={vStr}
             onChange={(e) => setVStr(e.target.value)}
@@ -48,7 +48,7 @@ export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, on
           />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span style={{ fontSize: 10, opacity: 0.5 }}>Sprint期間</span>
+          <span style={{ fontSize: 12, opacity: 0.7 }}>Sprint期間</span>
           <select
             value={sprintDays}
             onChange={(e) => onSprintDaysChange(parseInt(e.target.value))}

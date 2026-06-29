@@ -1,10 +1,10 @@
 import holiday_jp from "@holiday-jp/holiday_jp";
 import type { DagNode as DagNodeType, DagDerived as DagDerivedType, NodeStatus as NodeStatusType, CalendarConfig as CalendarConfigType, SprintConfig as SprintConfigType, EstimateMode as EstimateModeType } from "../schema/dag.js";
 
-function getRemaining(node: DagNodeType): number {
+function getRemaining(node: DagNodeType, estimateMode: EstimateModeType = "md"): number {
+  if (node.status === "完了") return 0;
+  if (estimateMode === "sp") return node.estimate;
   switch (node.status as NodeStatusType) {
-    case "完了":
-      return 0;
     case "進行中":
       return node.estimate * 0.5;
     case "PR Open":
@@ -62,7 +62,7 @@ export function computeCriticalPath(nodes: DagNodeType[], options?: CriticalPath
 
   for (const id of sorted) {
     const node = nodeMap.get(id)!;
-    const remaining = getRemaining(node);
+    const remaining = getRemaining(node, estimateMode);
 
     let maxPredDist = 0;
     let maxPred: string | null = null;

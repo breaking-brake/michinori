@@ -54,13 +54,19 @@ export function Header({ completionDate, remaining, repoUrl, summary, showCritic
       {completionDate ? (
         <>
           <span>
-            完了予定: <strong>{completionDate}</strong>
+            完了予定: <strong>{estimateMode === "sp" && velocity <= 0 ? "-" : completionDate}</strong>
           </span>
           {estimateMode === "sp" ? (
             <span style={{ fontSize: 12, opacity: 0.6, display: "inline-flex", alignItems: "center", gap: 4 }}>
-              残り {Math.ceil(totalEstimate / (velocity || 1))}スプリント
+              {velocity > 0 ? (
+                <>残り {Math.ceil(totalEstimate / velocity)}スプリント</>
+              ) : (
+                <>残り {totalEstimate}SP</>
+              )}
               <span
-                title={`${totalEstimate}SP ÷ ${velocity}SP/Sprint = ${Math.ceil(totalEstimate / (velocity || 1))}スプリント`}
+                title={velocity > 0
+                  ? `${totalEstimate}SP ÷ ${velocity}SP/Sprint = ${Math.ceil(totalEstimate / velocity)}スプリント`
+                  : "Sprint設定のVelocityを入力すると完了予定日が算出されます"}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

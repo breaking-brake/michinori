@@ -19,7 +19,7 @@ interface SprintSettingsPanelProps {
 }
 
 export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, onSprintDaysChange }: SprintSettingsPanelProps) {
-  const [vStr, setVStr] = useState(String(velocity));
+  const [vStr, setVStr] = useState(velocity > 0 ? String(velocity) : "");
 
   return (
     <div
@@ -43,7 +43,8 @@ export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, on
           <input
             type="number" min="1" step="1" value={vStr}
             onChange={(e) => setVStr(e.target.value)}
-            onBlur={() => { const v = parseInt(vStr) || 1; setVStr(String(v)); onVelocityChange(v); }}
+            placeholder="未設定"
+            onBlur={() => { const v = parseInt(vStr) || 0; setVStr(v > 0 ? String(v) : ""); onVelocityChange(v); }}
             style={{ ...fieldStyle, width: 80, textAlign: "center" as const }}
           />
         </div>

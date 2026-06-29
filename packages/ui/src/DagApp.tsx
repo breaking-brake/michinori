@@ -112,7 +112,7 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
 
 function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, repoUrl, summary, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false, onDismissProposal, onMarkProposalApplied, quota, estimateMode = "md", onEstimateModeChange }: DagAppProps) {
   const estimateUnit = estimateMode === "sp" ? "SP" : "MD";
-  const [velocity, setVelocity] = useState(20);
+  const [velocity, setVelocity] = useState(0);
   const [sprintDays, setSprintDays] = useState(10);
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);

@@ -24,6 +24,7 @@ import { ChatPanel } from "./components/ChatPanel";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { NodeDetailPanel } from "./components/NodeDetailPanel";
 import { CalendarPanel } from "./components/CalendarPanel";
+import { SprintSettingsPanel } from "./components/SprintSettingsPanel";
 import { ProposalPreviewDialog } from "./components/ProposalPreviewDialog";
 import type { DagAdapter, DagMessage, ChatMessage, QuotaInfo } from "./types";
 import type { DagProposalType } from "@michinori/shared";
@@ -246,9 +247,6 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         estimateMode={estimateMode}
         totalEstimate={derived?.totalEstimate ?? 0}
         velocity={velocity}
-        sprintDays={sprintDays}
-        onVelocityChange={(v) => { setVelocity(v); adapter.updateSprint({ velocity: v, sprintDays }); }}
-        onSprintDaysChange={(d) => { setSprintDays(d); adapter.updateSprint({ velocity, sprintDays: d }); }}
         onSave={() => adapter.save()}
         onLoad={() => adapter.load()}
         onReset={() => {
@@ -298,21 +296,31 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           )}
           {hasDag && (
             <Panel position="top-left">
-              <button
-                onClick={handleAddNode}
-                style={{
-                  padding: "6px 14px",
-                  background: "var(--vscode-button-background, #0e639c)",
-                  color: "var(--vscode-button-foreground, #fff)",
-                  border: "none",
-                  borderRadius: 4,
-                  cursor: "pointer",
-                  fontSize: 13,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                }}
-              >
-                + ノード追加
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button
+                  onClick={handleAddNode}
+                  style={{
+                    padding: "6px 14px",
+                    background: "var(--vscode-button-background, #0e639c)",
+                    color: "var(--vscode-button-foreground, #fff)",
+                    border: "none",
+                    borderRadius: 4,
+                    cursor: "pointer",
+                    fontSize: 13,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  + ノード追加
+                </button>
+                {estimateMode === "sp" && (
+                  <SprintSettingsPanel
+                    velocity={velocity}
+                    sprintDays={sprintDays}
+                    onVelocityChange={(v) => { setVelocity(v); adapter.updateSprint({ velocity: v, sprintDays }); }}
+                    onSprintDaysChange={(d) => { setSprintDays(d); adapter.updateSprint({ velocity, sprintDays: d }); }}
+                  />
+                )}
+              </div>
             </Panel>
           )}
         </ReactFlow>

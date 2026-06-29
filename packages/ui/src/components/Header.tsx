@@ -1,47 +1,4 @@
-import { useState } from "react";
 import type { QuotaInfo } from "../types";
-
-const smallInput = {
-  width: 48, padding: "2px 4px", fontSize: 12, textAlign: "center" as const,
-  background: "var(--vscode-input-background, #3c3c3c)",
-  color: "var(--vscode-input-foreground, #ccc)",
-  border: "1px solid var(--vscode-input-border, #555)",
-  borderRadius: 3,
-};
-
-const settingLabelStyle = { fontSize: 10, opacity: 0.5, marginBottom: 2 };
-
-function SprintSettings({ velocity, sprintDays, onVelocityChange, onSprintDaysChange }: {
-  velocity: number; sprintDays: number;
-  onVelocityChange: (v: number) => void; onSprintDaysChange: (d: number) => void;
-}) {
-  const [vStr, setVStr] = useState(String(velocity));
-  const [dStr, setDStr] = useState(String(sprintDays));
-  return (
-    <span style={{ display: "flex", gap: 12, fontSize: 12 }}>
-      <span style={{ display: "flex", flexDirection: "column" }}>
-        <span style={settingLabelStyle}>Velocity</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <input type="number" min="1" step="1" value={vStr}
-            onChange={(e) => setVStr(e.target.value)}
-            onBlur={() => { const v = parseInt(vStr) || 1; setVStr(String(v)); onVelocityChange(v); }}
-            style={smallInput} />
-          <span style={{ opacity: 0.5 }}>SP/Sprint</span>
-        </span>
-      </span>
-      <span style={{ display: "flex", flexDirection: "column" }}>
-        <span style={settingLabelStyle}>Sprint</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <input type="number" min="1" step="1" value={dStr}
-            onChange={(e) => setDStr(e.target.value)}
-            onBlur={() => { const d = parseInt(dStr) || 1; setDStr(String(d)); onSprintDaysChange(d); }}
-            style={smallInput} />
-          <span style={{ opacity: 0.5 }}>稼働日</span>
-        </span>
-      </span>
-    </span>
-  );
-}
 
 const headerBtnStyle = {
   padding: "4px 12px",
@@ -71,12 +28,9 @@ interface HeaderProps {
   estimateMode?: string;
   totalEstimate?: number;
   velocity?: number;
-  sprintDays?: number;
-  onVelocityChange?: (v: number) => void;
-  onSprintDaysChange?: (d: number) => void;
 }
 
-export function Header({ completionDate, remaining, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota, estimateUnit = "MD", estimateMode, totalEstimate = 0, velocity = 20, sprintDays = 10, onVelocityChange, onSprintDaysChange }: HeaderProps) {
+export function Header({ completionDate, remaining, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota, estimateUnit = "MD", estimateMode, totalEstimate = 0, velocity = 20 }: HeaderProps) {
   return (
     <div
       style={{
@@ -102,18 +56,10 @@ export function Header({ completionDate, remaining, repoUrl, summary, showCritic
           <span>
             完了予定: <strong>{completionDate}</strong>
           </span>
-          {estimateMode === "sp" && onVelocityChange && onSprintDaysChange ? (
-            <>
-              <span style={{ fontSize: 12, opacity: 0.6 }}>
-                残り {totalEstimate}SP ÷ {velocity}SP/Sprint = {Math.ceil(totalEstimate / (velocity || 1))}スプリント
-              </span>
-              <SprintSettings
-                velocity={velocity}
-                sprintDays={sprintDays}
-                onVelocityChange={onVelocityChange}
-                onSprintDaysChange={onSprintDaysChange}
-              />
-            </>
+          {estimateMode === "sp" ? (
+            <span style={{ fontSize: 12, opacity: 0.6 }}>
+              残り {totalEstimate}SP ÷ {velocity}SP/Sprint = {Math.ceil(totalEstimate / (velocity || 1))}スプリント
+            </span>
           ) : (
             <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>
           )}

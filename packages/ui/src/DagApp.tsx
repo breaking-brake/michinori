@@ -294,33 +294,33 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
               <Legend showCriticalPath={showCriticalPath} estimateMode={estimateMode} />
             </Panel>
           )}
-          {hasDag && (
+          {hasDag && estimateMode === "sp" && (
             <Panel position="top-left">
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {estimateMode === "sp" && (
-                  <SprintSettingsPanel
-                    velocity={velocity}
-                    sprintDays={sprintDays}
-                    onVelocityChange={(v) => { setVelocity(v); adapter.updateSprint({ velocity: v, sprintDays }); }}
-                    onSprintDaysChange={(d) => { setSprintDays(d); adapter.updateSprint({ velocity, sprintDays: d }); }}
-                  />
-                )}
-                <button
-                  onClick={handleAddNode}
-                  style={{
-                    padding: "6px 14px",
-                    background: "var(--vscode-button-background, #0e639c)",
-                    color: "var(--vscode-button-foreground, #fff)",
-                    border: "none",
-                    borderRadius: 4,
-                    cursor: "pointer",
-                    fontSize: 13,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                  }}
-                >
-                  + ノード追加
-                </button>
-              </div>
+              <SprintSettingsPanel
+                velocity={velocity}
+                sprintDays={sprintDays}
+                onVelocityChange={(v) => { setVelocity(v); adapter.updateSprint({ velocity: v, sprintDays }); }}
+                onSprintDaysChange={(d) => { setSprintDays(d); adapter.updateSprint({ velocity, sprintDays: d }); }}
+              />
+            </Panel>
+          )}
+          {hasDag && (
+            <Panel position="top-right">
+              <button
+                onClick={handleAddNode}
+                style={{
+                  padding: "6px 14px",
+                  background: "var(--vscode-button-background, #0e639c)",
+                  color: "var(--vscode-button-foreground, #fff)",
+                  border: "none",
+                  borderRadius: 4,
+                  cursor: "pointer",
+                  fontSize: 13,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                }}
+              >
+                + ノード追加
+              </button>
             </Panel>
           )}
         </ReactFlow>

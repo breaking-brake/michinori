@@ -244,10 +244,11 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         quota={quota}
         estimateUnit={estimateUnit}
         estimateMode={estimateMode}
+        totalEstimate={derived?.totalEstimate ?? 0}
         velocity={velocity}
         sprintDays={sprintDays}
-        onVelocityChange={setVelocity}
-        onSprintDaysChange={setSprintDays}
+        onVelocityChange={(v) => { setVelocity(v); adapter.updateSprint({ velocity: v, sprintDays }); }}
+        onSprintDaysChange={(d) => { setSprintDays(d); adapter.updateSprint({ velocity, sprintDays: d }); }}
         onSave={() => adapter.save()}
         onLoad={() => adapter.load()}
         onReset={() => {

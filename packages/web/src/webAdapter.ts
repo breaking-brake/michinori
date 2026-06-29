@@ -226,6 +226,15 @@ export function createWebAdapter(
       saveDag(dag);
       dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
     },
+    updateSprint: (sprint) => {
+      const dag = getDag();
+      if (!dag) return;
+      dag.sprint = { velocity: sprint.velocity, sprintDays: sprint.sprintDays };
+      dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
+      dag.metadata.updatedAt = new Date().toISOString();
+      saveDag(dag);
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
+    },
     save: () => {
       const dag = getDag();
       if (!dag) return;

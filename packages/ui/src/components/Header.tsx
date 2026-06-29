@@ -57,13 +57,14 @@ interface HeaderProps {
   quota?: QuotaInfo | null;
   estimateUnit?: string;
   estimateMode?: string;
+  totalEstimate?: number;
   velocity?: number;
   sprintDays?: number;
   onVelocityChange?: (v: number) => void;
   onSprintDaysChange?: (d: number) => void;
 }
 
-export function Header({ completionDate, remaining, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota, estimateUnit = "MD", estimateMode, velocity = 20, sprintDays = 10, onVelocityChange, onSprintDaysChange }: HeaderProps) {
+export function Header({ completionDate, remaining, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota, estimateUnit = "MD", estimateMode, totalEstimate = 0, velocity = 20, sprintDays = 10, onVelocityChange, onSprintDaysChange }: HeaderProps) {
   return (
     <div
       style={{
@@ -89,14 +90,19 @@ export function Header({ completionDate, remaining, repoUrl, summary, showCritic
           <span>
             完了予定: <strong>{completionDate}</strong>
           </span>
-          <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>
-          {estimateMode === "sp" && onVelocityChange && onSprintDaysChange && (
-            <SprintInputs
-              velocity={velocity}
-              sprintDays={sprintDays}
-              onVelocityChange={onVelocityChange}
-              onSprintDaysChange={onSprintDaysChange}
-            />
+          {estimateMode === "sp" && onVelocityChange && onSprintDaysChange ? (
+            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, opacity: 0.7 }}>
+              残り {totalEstimate}SP ÷
+              <SprintInputs
+                velocity={velocity}
+                sprintDays={sprintDays}
+                onVelocityChange={onVelocityChange}
+                onSprintDaysChange={onSprintDaysChange}
+              />
+              = {Math.ceil(totalEstimate / (velocity || 1))}スプリント
+            </span>
+          ) : (
+            <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>
           )}
           {onCalendar && (
             <button onClick={onCalendar} style={headerBtnStyle}>稼働日設定</button>

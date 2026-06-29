@@ -15,6 +15,7 @@ export interface DagAdapter {
   onReady(): void;
   reset(): void;
   updateCalendar(calendar: { preset?: string; customDayOff?: string[]; customDayOn?: string[] }): void;
+  updateSprint(sprint: { velocity: number; sprintDays: number }): void;
   save(): void;
   load(): void;
 }

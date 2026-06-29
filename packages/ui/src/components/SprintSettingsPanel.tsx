@@ -37,18 +37,15 @@ export function SprintSettingsPanel({ velocity, sprintDays, onVelocityChange, on
       }}
     >
       <div style={{ fontWeight: 600, fontSize: 11, opacity: 0.7 }}>Sprint 設定</div>
-      <div style={{ display: "flex", gap: 10 }}>
+      <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span style={{ fontSize: 10, opacity: 0.5 }}>Velocity</span>
-          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <input
-              type="number" min="1" step="1" value={vStr}
-              onChange={(e) => setVStr(e.target.value)}
-              onBlur={() => { const v = parseInt(vStr) || 1; setVStr(String(v)); onVelocityChange(v); }}
-              style={{ ...fieldStyle, width: 52, textAlign: "center" as const }}
-            />
-            <span style={{ opacity: 0.5 }}>SP/Sprint</span>
-          </span>
+          <span style={{ fontSize: 10, opacity: 0.5 }}>Velocity (SP/Sprint)</span>
+          <input
+            type="number" min="1" step="1" value={vStr}
+            onChange={(e) => setVStr(e.target.value)}
+            onBlur={() => { const v = parseInt(vStr) || 1; setVStr(String(v)); onVelocityChange(v); }}
+            style={{ ...fieldStyle, width: 80, textAlign: "center" as const }}
+          />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <span style={{ fontSize: 10, opacity: 0.5 }}>Sprint期間</span>

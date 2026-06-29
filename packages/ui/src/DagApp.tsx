@@ -297,6 +297,14 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           {hasDag && (
             <Panel position="top-left">
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {estimateMode === "sp" && (
+                  <SprintSettingsPanel
+                    velocity={velocity}
+                    sprintDays={sprintDays}
+                    onVelocityChange={(v) => { setVelocity(v); adapter.updateSprint({ velocity: v, sprintDays }); }}
+                    onSprintDaysChange={(d) => { setSprintDays(d); adapter.updateSprint({ velocity, sprintDays: d }); }}
+                  />
+                )}
                 <button
                   onClick={handleAddNode}
                   style={{
@@ -312,14 +320,6 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
                 >
                   + ノード追加
                 </button>
-                {estimateMode === "sp" && (
-                  <SprintSettingsPanel
-                    velocity={velocity}
-                    sprintDays={sprintDays}
-                    onVelocityChange={(v) => { setVelocity(v); adapter.updateSprint({ velocity: v, sprintDays }); }}
-                    onSprintDaysChange={(d) => { setSprintDays(d); adapter.updateSprint({ velocity, sprintDays: d }); }}
-                  />
-                )}
               </div>
             </Panel>
           )}

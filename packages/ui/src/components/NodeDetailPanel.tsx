@@ -27,37 +27,39 @@ interface NodeDetailPanelProps {
   status: string;
   description: string;
   category: string;
-  estimateMd: number;
-  onUpdate: (fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number }) => void;
+  estimate: number;
+  onUpdate: (fields: { label?: string; status?: string; category?: string; description?: string; estimate?: number }) => void;
   onClose: () => void;
   readOnly?: boolean;
+  estimateUnit?: string;
 }
 
-export function NodeDetailPanel({ nodeId, label, status, category, description, estimateMd, onUpdate, onClose, readOnly = false }: NodeDetailPanelProps) {
+export function NodeDetailPanel({ nodeId, label, status, category, description, estimate, onUpdate, onClose, readOnly = false, estimateUnit = "MD" }: NodeDetailPanelProps) {
   const [editLabel, setEditLabel] = useState(label);
   const [editStatus, setEditStatus] = useState(status);
   const [editCategory, setEditCategory] = useState(category);
   const [editDescription, setEditDescription] = useState(description);
-  const [editEstimateMdStr, setEditEstimateMdStr] = useState(String(estimateMd));
+  const [editEstimateStr, setEditEstimateStr] = useState(String(estimate));
 
   useEffect(() => {
     setEditLabel(label);
     setEditStatus(status);
     setEditCategory(category);
     setEditDescription(description);
-    setEditEstimateMdStr(String(estimateMd));
-  }, [nodeId, label, status, category, description, estimateMd]);
+    setEditEstimateStr(String(estimate));
+  }, [nodeId, label, status, category, description, estimate]);
 
   const handleSave = () => {
-    const parsedMd = Math.round(parseFloat(editEstimateMdStr || "0") * 10) / 10;
-    const finalMd = parsedMd > 0 ? parsedMd : 0.1;
-    const fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number } = {};
+    const finalVal = estimateUnit === "SP"
+      ? (parseInt(editEstimateStr) || 1)
+      : (Math.round(parseFloat(editEstimateStr || "0") * 10) / 10 || 0.1);
+    const fields: { label?: string; status?: string; category?: string; description?: string; estimate?: number } = {};
     if (editLabel !== label) fields.label = editLabel;
     if (editStatus !== status) fields.status = editStatus;
     if (editCategory !== category) fields.category = editCategory;
     if (editDescription !== description) fields.description = editDescription;
-    if (finalMd !== estimateMd) fields.estimateMd = finalMd;
-    setEditEstimateMdStr(String(finalMd));
+    if (finalVal !== estimate) fields.estimate = finalVal;
+    setEditEstimateStr(String(finalVal));
     if (Object.keys(fields).length > 0) {
       onUpdate(fields);
     }
@@ -170,20 +172,33 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
         </div>
 
         <div>
-          <div style={labelStyle}>工数 (MD)</div>
-          <input
-            type="number"
-            min="0.1"
-            step="0.1"
-            value={editEstimateMdStr}
-            onChange={(e) => setEditEstimateMdStr(e.target.value)}
-            onBlur={() => {
-              const parsed = Math.round(parseFloat(editEstimateMdStr || "0") * 10) / 10;
-              setEditEstimateMdStr(String(parsed > 0 ? parsed : 0.1));
-            }}
-            disabled={readOnly}
-            style={inputStyle}
-          />
+          <div style={labelStyle}>{estimateUnit === "SP" ? "ストーリーポイント" : "工数 (MD)"}</div>
+          {estimateUnit === "SP" ? (
+            <select
+              value={editEstimateStr}
+              onChange={(e) => setEditEstimateStr(e.target.value)}
+              disabled={readOnly}
+              style={{ ...inputStyle, cursor: readOnly ? "default" : "pointer" }}
+            >
+              {[1, 2, 3, 5, 8, 13].map((sp) => (
+                <option key={sp} value={String(sp)}>{sp}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="number"
+              min="0.1"
+              step="0.1"
+              value={editEstimateStr}
+              onChange={(e) => setEditEstimateStr(e.target.value)}
+              onBlur={() => {
+                const parsed = Math.round(parseFloat(editEstimateStr || "0") * 10) / 10;
+                setEditEstimateStr(String(parsed > 0 ? parsed : 0.1));
+              }}
+              disabled={readOnly}
+              style={inputStyle}
+            />
+          )}
         </div>
 
         {!readOnly && (

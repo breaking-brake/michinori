@@ -18,7 +18,7 @@ export function applyProposalToNodes(
     if (node) {
       if (mod.changes.label !== undefined) node.label = mod.changes.label;
       if (mod.changes.description !== undefined) node.description = mod.changes.description;
-      if (mod.changes.estimateMd !== undefined) node.estimateMd = mod.changes.estimateMd;
+      if (mod.changes.estimate !== undefined) node.estimate = mod.changes.estimate;
       if (mod.changes.category !== undefined) node.category = mod.changes.category as DagNodeType["category"];
       if (mod.changes.status !== undefined) node.status = mod.changes.status as DagNodeType["status"];
       if (mod.changes.position !== undefined) node.position = mod.changes.position;

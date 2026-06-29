@@ -24,6 +24,7 @@ import { ChatPanel } from "./components/ChatPanel";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { NodeDetailPanel } from "./components/NodeDetailPanel";
 import { CalendarPanel } from "./components/CalendarPanel";
+import { SprintSettingsPanel } from "./components/SprintSettingsPanel";
 import { ProposalPreviewDialog } from "./components/ProposalPreviewDialog";
 import type { DagAdapter, DagMessage, ChatMessage, QuotaInfo } from "./types";
 import type { DagProposalType } from "@michinori/shared";
@@ -52,6 +53,8 @@ interface DagAppProps {
   onDismissProposal?: () => void;
   onMarkProposalApplied?: () => void;
   quota?: QuotaInfo | null;
+  estimateMode?: string;
+  onEstimateModeChange?: (mode: string) => void;
 }
 
 function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }> {
@@ -107,7 +110,10 @@ function autoLayout(nodes: DagNodeType[]): Map<string, { x: number; y: number }>
   return positions;
 }
 
-function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, repoUrl, summary, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false, onDismissProposal, onMarkProposalApplied, quota }: DagAppProps) {
+function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, error, hasDag, repoUrl, summary, defaultRepoUrl, defaultPrompt, calendarPreset = "weekday", customDayOff = [], customDayOn = [], chatMessages = [], chatLoading = false, onDismissProposal, onMarkProposalApplied, quota, estimateMode = "md", onEstimateModeChange }: DagAppProps) {
+  const estimateUnit = estimateMode === "sp" ? "SP" : "MD";
+  const [velocity, setVelocity] = useState(0);
+  const [sprintDays, setSprintDays] = useState(10);
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -136,11 +142,12 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         position: n.position ?? positions.get(n.id) ?? { x: 0, y: 0 },
         data: {
           label: n.label,
-          estimateMd: n.estimateMd,
+          estimate: n.estimate,
           category: n.category,
           status: n.status,
           description: n.description,
           onCriticalPath: criticalSet.has(n.id),
+          estimateUnit,
           onDelete: (nodeId: string) => {
             if (window.confirm("このノードを削除しますか？")) {
               setSelectedNodeId(null);
@@ -228,7 +235,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
     <div style={{ width: "100vw", height: "100vh", display: "flex", flexDirection: "column" }}>
       <Header
         completionDate={derived?.estimatedCompletionDate ?? null}
-        remainingMd={derived?.remainingMd ?? 0}
+        remaining={derived?.remaining ?? 0}
         repoUrl={repoUrl}
         summary={summary}
         showCriticalPath={showCriticalPath}
@@ -236,6 +243,10 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         onCalendar={() => { setCalendarOpen(!calendarOpen); setSelectedNodeId(null); setChatOpen(false); }}
         onChat={hasDag ? () => { setChatOpen(!chatOpen); setSelectedNodeId(null); setCalendarOpen(false); } : undefined}
         quota={quota}
+        estimateUnit={estimateUnit}
+        estimateMode={estimateMode}
+        totalEstimate={derived?.totalEstimate ?? 0}
+        velocity={velocity}
         onSave={() => adapter.save()}
         onLoad={() => adapter.load()}
         onReset={() => {
@@ -258,6 +269,8 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           defaultRepoUrl={defaultRepoUrl}
           defaultPrompt={defaultPrompt}
           quota={quota}
+          estimateMode={estimateMode}
+          onEstimateModeChange={onEstimateModeChange}
         />
       )}
       <div style={{ flex: 1, position: "relative" }}>
@@ -281,8 +294,18 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
               <Legend showCriticalPath={showCriticalPath} />
             </Panel>
           )}
-          {hasDag && (
+          {hasDag && estimateMode === "sp" && (
             <Panel position="top-left">
+              <SprintSettingsPanel
+                velocity={velocity}
+                sprintDays={sprintDays}
+                onVelocityChange={(v) => { setVelocity(v); adapter.updateSprint({ velocity: v, sprintDays }); }}
+                onSprintDaysChange={(d) => { setSprintDays(d); adapter.updateSprint({ velocity, sprintDays: d }); }}
+              />
+            </Panel>
+          )}
+          {hasDag && (
+            <Panel position="top-right">
               <button
                 onClick={handleAddNode}
                 style={{
@@ -318,7 +341,8 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
             status={selectedDagNode.status}
             category={selectedDagNode.category}
             description={selectedDagNode.description}
-            estimateMd={selectedDagNode.estimateMd}
+            estimate={selectedDagNode.estimate}
+            estimateUnit={estimateUnit}
             onUpdate={(fields) => {
               adapter.updateNode(selectedDagNode.id, fields);
               setSelectedNodeId(null);
@@ -341,7 +365,7 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         <ProposalPreviewDialog
           currentNodes={dagNodes}
           proposal={pendingProposal}
-          calendarConfig={{ preset: calendarPreset as "weekday" | "weekend", customDayOff, customDayOn }}
+          calendarConfig={{ calendar: { preset: calendarPreset as "weekday" | "weekend", customDayOff, customDayOn }, estimateMode: estimateMode as "md" | "sp" }}
           onConfirm={() => {
             adapter.applyProposal(pendingProposal);
             onMarkProposalApplied?.();

@@ -63,6 +63,8 @@ export default function App() {
         vscode?.postMessage({ type: "ready" }),
       updateCalendar: (calendar) =>
         vscode?.postMessage({ type: "updateCalendar", calendar }),
+      updateSprint: (sprint) =>
+        vscode?.postMessage({ type: "updateSprint", sprint }),
       save: () =>
         vscode?.postMessage({ type: "save" }),
       load: () =>

@@ -48,6 +48,7 @@ export function createWebAdapter(
   addUserChatMessage: (content: string) => void,
   getChatMessages: () => ChatMessage[],
   onQuotaUpdate: (quota: QuotaInfo) => void,
+  getEstimateMode: () => string,
 ): DagAdapter {
   async function callAnalyze(
     repoUrl: string,
@@ -61,7 +62,7 @@ export function createWebAdapter(
       const res = await fetch(`${endpoint}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ repoUrl, prompt, currentDag }),
+        body: JSON.stringify({ repoUrl, prompt, estimateMode: currentDag?.metadata?.estimateMode ?? getEstimateMode(), currentDag }),
       });
 
       const quota = parseQuotaHeaders(res);
@@ -73,7 +74,7 @@ export function createWebAdapter(
       }
 
       const data = (await res.json()) as { summary: string; nodes: DagNodeType[]; model: string };
-      const derived = computeCriticalPath(data.nodes, currentDag?.calendar);
+      const derived = computeCriticalPath(data.nodes, { calendar: currentDag?.calendar, estimateMode: currentDag?.metadata?.estimateMode, sprint: currentDag?.sprint });
       const now = new Date().toISOString();
 
       const dag: MichinoriFileType = {
@@ -82,6 +83,7 @@ export function createWebAdapter(
           repoUrl,
           prompt,
           summary: data.summary,
+          estimateMode: currentDag?.metadata.estimateMode ?? "md",
           generatedAt: currentDag?.metadata.generatedAt ?? now,
           updatedAt: now,
           model: data.model,
@@ -119,7 +121,7 @@ export function createWebAdapter(
       const node = dag.nodes.find((n) => n.id === nodeId);
       if (node) {
         (node as { status: string }).status = status;
-        dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+        dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
         dag.metadata.updatedAt = new Date().toISOString();
         saveDag(dag);
         dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
@@ -134,8 +136,8 @@ export function createWebAdapter(
         if (fields.status !== undefined) (node as { status: string }).status = fields.status;
         if (fields.category !== undefined) (node as { category: string }).category = fields.category;
         if (fields.description !== undefined) (node as { description: string }).description = fields.description;
-        if (fields.estimateMd !== undefined) (node as { estimateMd: number }).estimateMd = fields.estimateMd;
-        dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+        if (fields.estimate !== undefined) (node as { estimate: number }).estimate = fields.estimate;
+        dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
         dag.metadata.updatedAt = new Date().toISOString();
         saveDag(dag);
         dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
@@ -149,14 +151,14 @@ export function createWebAdapter(
         id,
         label: "新しいタスク",
         description: "",
-        estimateMd: 1,
+        estimate: 1,
         category: "実装",
         status: "未着手",
         dependencies: [],
         position,
       };
       dag.nodes.push(newNode);
-      dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+      dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
       dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
@@ -168,7 +170,7 @@ export function createWebAdapter(
       for (const node of dag.nodes) {
         node.dependencies = node.dependencies.filter((d) => d !== nodeId);
       }
-      dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+      dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
       dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
@@ -180,7 +182,7 @@ export function createWebAdapter(
       const target = dag.nodes.find((n) => n.id === targetId);
       if (!target || target.dependencies.includes(sourceId)) return;
       target.dependencies.push(sourceId);
-      dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+      dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
       dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
@@ -191,7 +193,7 @@ export function createWebAdapter(
       const target = dag.nodes.find((n) => n.id === targetId);
       if (!target) return;
       target.dependencies = target.dependencies.filter((d) => d !== sourceId);
-      dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+      dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
       dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
@@ -219,10 +221,19 @@ export function createWebAdapter(
         customDayOff: update.customDayOff ?? dag.calendar?.customDayOff ?? [],
         customDayOn: update.customDayOn ?? dag.calendar?.customDayOn ?? [],
       };
-      dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+      dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
       dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
+    },
+    updateSprint: (sprint) => {
+      const dag = getDag();
+      if (!dag) return;
+      dag.sprint = { velocity: sprint.velocity, sprintDays: sprint.sprintDays };
+      dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
+      dag.metadata.updatedAt = new Date().toISOString();
+      saveDag(dag);
+      dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived });
     },
     save: () => {
       const dag = getDag();
@@ -302,7 +313,7 @@ export function createWebAdapter(
         if (node) {
           if (mod.changes.label !== undefined) (node as { label: string }).label = mod.changes.label;
           if (mod.changes.description !== undefined) (node as { description: string }).description = mod.changes.description;
-          if (mod.changes.estimateMd !== undefined) (node as { estimateMd: number }).estimateMd = mod.changes.estimateMd;
+          if (mod.changes.estimate !== undefined) (node as { estimate: number }).estimate = mod.changes.estimate;
           if (mod.changes.category !== undefined) (node as { category: string }).category = mod.changes.category;
           if (mod.changes.status !== undefined) (node as { status: string }).status = mod.changes.status;
           if (mod.changes.position !== undefined) node.position = mod.changes.position;
@@ -313,14 +324,14 @@ export function createWebAdapter(
         dag.nodes.push(addition);
       }
 
-      dag.derived = computeCriticalPath(dag.nodes, dag.calendar);
+      dag.derived = computeCriticalPath(dag.nodes, { calendar: dag.calendar, estimateMode: dag.metadata?.estimateMode, sprint: dag.sprint });
       dag.metadata.updatedAt = new Date().toISOString();
       saveDag(dag);
       dispatch({ type: "dagUpdate", nodes: dag.nodes, derived: dag.derived, calendar: dag.calendar });
     },
     reset: () => {
       localStorage.removeItem(DAG_STORAGE);
-      dispatch({ type: "dagUpdate", nodes: [], derived: { criticalPath: [], estimatedCompletionDate: "", totalEstimateMd: 0, remainingMd: 0 } });
+      dispatch({ type: "dagUpdate", nodes: [], derived: { criticalPath: [], estimatedCompletionDate: "", totalEstimate: 0, remaining: 0 } });
     },
   };
 }

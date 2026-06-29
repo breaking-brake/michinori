@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { DagNode, MichinoriFile } from "./dag.js";
+import { DagNode, EstimateMode, MichinoriFile } from "./dag.js";
 
 export const AnalyzeRequest = z.object({
   repoUrl: z.string().url().startsWith("https://github.com/"),
   prompt: z.string().min(1).max(2000),
+  estimateMode: EstimateMode.default("md"),
   currentDag: MichinoriFile.nullable().default(null),
 });
 export type AnalyzeRequest = z.infer<typeof AnalyzeRequest>;
@@ -28,7 +29,7 @@ export const DagProposal = z.object({
     changes: z.object({
       label: z.string().optional(),
       description: z.string().optional(),
-      estimateMd: z.number().optional(),
+      estimate: z.number().optional(),
       category: z.string().optional(),
       status: z.string().optional(),
       position: z.object({ x: z.number(), y: z.number() }).optional(),

@@ -85,7 +85,7 @@ export function Legend({ showCriticalPath = false }: { showCriticalPath?: boolea
         ))}
       </div>
 
-      <div>
+      <div style={sectionStyle}>
         <div style={titleStyle}>カテゴリ</div>
         {CATEGORY_DEFINITIONS.map((c) => (
           <div key={c.value} style={itemStyle}>

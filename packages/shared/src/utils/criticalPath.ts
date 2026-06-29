@@ -1,26 +1,35 @@
 import holiday_jp from "@holiday-jp/holiday_jp";
-import type { DagNode as DagNodeType, DagDerived as DagDerivedType, NodeStatus as NodeStatusType, CalendarConfig as CalendarConfigType } from "../schema/dag.js";
+import type { DagNode as DagNodeType, DagDerived as DagDerivedType, NodeStatus as NodeStatusType, CalendarConfig as CalendarConfigType, SprintConfig as SprintConfigType, EstimateMode as EstimateModeType } from "../schema/dag.js";
 
-function getRemainingMd(node: DagNodeType): number {
+function getRemaining(node: DagNodeType, estimateMode: EstimateModeType = "md"): number {
+  if (node.status === "完了") return 0;
+  if (estimateMode === "sp") return node.estimate;
   switch (node.status as NodeStatusType) {
-    case "完了":
-      return 0;
     case "進行中":
-      return node.estimateMd * 0.5;
+      return node.estimate * 0.5;
     case "PR Open":
-      return 0;
+      return node.estimate * 0.3;
     case "未着手":
     default:
-      return node.estimateMd;
+      return node.estimate;
   }
 }
 
-export function computeCriticalPath(nodes: DagNodeType[], calendar?: CalendarConfigType): DagDerivedType {
+export interface CriticalPathOptions {
+  estimateMode?: EstimateModeType;
+  calendar?: CalendarConfigType;
+  sprint?: SprintConfigType;
+}
+
+export function computeCriticalPath(nodes: DagNodeType[], options?: CriticalPathOptions): DagDerivedType {
+  const calendar = options?.calendar;
+  const estimateMode = options?.estimateMode ?? "md";
+  const sprint = options?.sprint;
+
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const dist = new Map<string, number>();
   const prev = new Map<string, string | null>();
 
-  // Topological sort (Kahn's algorithm)
   const inDegree = new Map<string, number>();
   const adj = new Map<string, string[]>();
 
@@ -51,10 +60,9 @@ export function computeCriticalPath(nodes: DagNodeType[], calendar?: CalendarCon
     }
   }
 
-  // Longest path DP
   for (const id of sorted) {
     const node = nodeMap.get(id)!;
-    const remaining = getRemainingMd(node);
+    const remaining = getRemaining(node, estimateMode);
 
     let maxPredDist = 0;
     let maxPred: string | null = null;
@@ -71,7 +79,6 @@ export function computeCriticalPath(nodes: DagNodeType[], calendar?: CalendarCon
     prev.set(id, maxPred);
   }
 
-  // Find leaf with longest distance
   let maxDist = 0;
   let maxId: string | null = null;
   for (const [id, d] of dist) {
@@ -81,7 +88,6 @@ export function computeCriticalPath(nodes: DagNodeType[], calendar?: CalendarCon
     }
   }
 
-  // Trace back critical path
   const criticalPath: string[] = [];
   let current = maxId;
   while (current) {
@@ -89,15 +95,51 @@ export function computeCriticalPath(nodes: DagNodeType[], calendar?: CalendarCon
     current = prev.get(current) ?? null;
   }
 
-  const totalEstimateMd = nodes.reduce((sum, n) => sum + n.estimateMd, 0);
-  const remainingMd = maxDist;
+  const totalEstimate = nodes.reduce((sum, n) => sum + n.estimate, 0);
+  const remaining = maxDist;
+
+  let estimatedCompletionDate: string;
+  if (estimateMode === "sp" && sprint) {
+    estimatedCompletionDate = computeCompletionDateSp(totalEstimate, remaining, sprint, calendar);
+  } else {
+    estimatedCompletionDate = computeCompletionDateMd(remaining, calendar);
+  }
 
   return {
     criticalPath,
-    estimatedCompletionDate: computeCompletionDate(remainingMd, calendar),
-    totalEstimateMd,
-    remainingMd,
+    estimatedCompletionDate,
+    totalEstimate,
+    remaining,
   };
+}
+
+function computeCompletionDateSp(
+  totalSp: number,
+  _remainingCritical: number,
+  sprint: SprintConfigType,
+  calendar?: CalendarConfigType,
+): string {
+  const remainingSp = totalSp;
+  if (remainingSp <= 0 || sprint.velocity <= 0) return new Date().toISOString().split("T")[0];
+
+  const sprintsNeeded = Math.ceil(remainingSp / sprint.velocity);
+  const calendarDays = sprintsNeeded * sprint.sprintDays;
+
+  const date = new Date();
+  const holidayCache = new Map<number, Set<string>>();
+  const preset = calendar?.preset ?? "weekday";
+  const customDayOff = new Set(calendar?.customDayOff ?? []);
+  const customDayOn = new Set(calendar?.customDayOn ?? []);
+
+  let workingDaysCount = 0;
+  while (workingDaysCount < calendarDays) {
+    date.setDate(date.getDate() + 1);
+    if (isWorkingDay(date, holidayCache, preset, customDayOff, customDayOn)) {
+      workingDaysCount++;
+    }
+  }
+
+  return date.toISOString().split("T")[0];
 }
 
 export function getJpHolidays(year: number): Array<{ date: string; name: string }> {
@@ -139,7 +181,7 @@ function isWorkingDay(
   return !isWeekend && !isJpHoliday;
 }
 
-function computeCompletionDate(remainingMd: number, calendar?: CalendarConfigType): string {
+function computeCompletionDateMd(remainingMd: number, calendar?: CalendarConfigType): string {
   if (remainingMd <= 0) return new Date().toISOString().split("T")[0];
 
   let daysNeeded = Math.ceil(remainingMd);

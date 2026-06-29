@@ -10,15 +10,34 @@ const inputStyle = {
   fontSize: 13,
 } as const;
 
+const radioLabelStyle = {
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  gap: 4,
+  fontSize: 13,
+  color: "var(--vscode-foreground, #ccc)",
+} as const;
+
 interface InputPanelProps {
   onSubmit: (repoUrl: string, prompt: string) => void;
   loading: boolean;
   defaultRepoUrl?: string;
   defaultPrompt?: string;
   quota?: QuotaInfo | null;
+  estimateMode?: string;
+  onEstimateModeChange?: (mode: string) => void;
 }
 
-export function InputPanel({ onSubmit, loading, defaultRepoUrl = "", defaultPrompt = "", quota }: InputPanelProps) {
+export function InputPanel({
+  onSubmit,
+  loading,
+  defaultRepoUrl = "",
+  defaultPrompt = "",
+  quota,
+  estimateMode = "md",
+  onEstimateModeChange,
+}: InputPanelProps) {
   const [repoUrl, setRepoUrl] = useState(defaultRepoUrl);
   const [prompt, setPrompt] = useState(defaultPrompt);
 
@@ -54,6 +73,35 @@ export function InputPanel({ onSubmit, loading, defaultRepoUrl = "", defaultProm
         rows={3}
         style={{ ...inputStyle, resize: "vertical" as const }}
       />
+
+      {onEstimateModeChange && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ fontSize: 11, opacity: 0.6 }}>見積もり単位</div>
+          <div style={{ display: "flex", gap: 16 }}>
+            <label style={radioLabelStyle}>
+              <input
+                type="radio"
+                name="estimateMode"
+                value="md"
+                checked={estimateMode === "md"}
+                onChange={() => onEstimateModeChange("md")}
+              />
+              人日 (MD)
+            </label>
+            <label style={radioLabelStyle}>
+              <input
+                type="radio"
+                name="estimateMode"
+                value="sp"
+                checked={estimateMode === "sp"}
+                onChange={() => onEstimateModeChange("sp")}
+              />
+              ストーリーポイント (SP)
+            </label>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={handleSubmit}
         disabled={!canSubmit}

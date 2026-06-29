@@ -20,8 +20,8 @@ analyze.post("/", async (c) => {
     );
   }
 
-  const { repoUrl, prompt, currentDag } = parsed.data;
-  logger.info("analyze:start", { repoUrl, hasCurrentDag: !!currentDag });
+  const { repoUrl, prompt, estimateMode, currentDag } = parsed.data;
+  logger.info("analyze:start", { repoUrl, estimateMode, hasCurrentDag: !!currentDag });
 
   let cloneResult;
   try {
@@ -42,7 +42,7 @@ analyze.post("/", async (c) => {
     const codeContext = buildCodeContext(files);
     const fullPrompt = buildPrompt(prompt, fileTree, codeContext, currentDag);
 
-    const result = await generateDag(fullPrompt);
+    const result = await generateDag(fullPrompt, estimateMode);
 
     logger.info("analyze:done", { repoUrl, nodeCount: result.nodes.length });
 

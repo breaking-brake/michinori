@@ -1,5 +1,25 @@
 import type { QuotaInfo } from "../types";
 
+function HelpBadge({ title }: { title: string }) {
+  return (
+    <span
+      title={title}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 16,
+        height: 16,
+        borderRadius: "50%",
+        border: "1px solid var(--vscode-panel-border, #555)",
+        fontSize: 10,
+        cursor: "help",
+        opacity: 0.6,
+      }}
+    >?</span>
+  );
+}
+
 const headerBtnStyle = {
   padding: "4px 12px",
   background: "transparent",
@@ -13,7 +33,7 @@ const headerBtnStyle = {
 
 interface HeaderProps {
   completionDate: string | null;
-  remainingMd: number;
+  remaining: number;
   repoUrl?: string;
   summary?: string;
   showCriticalPath?: boolean;
@@ -24,9 +44,13 @@ interface HeaderProps {
   onCalendar?: () => void;
   onChat?: () => void;
   quota?: QuotaInfo | null;
+  estimateUnit?: string;
+  estimateMode?: string;
+  totalEstimate?: number;
+  velocity?: number;
 }
 
-export function Header({ completionDate, remainingMd, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota }: HeaderProps) {
+export function Header({ completionDate, remaining, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota, estimateUnit = "MD", estimateMode, totalEstimate = 0, velocity = 20 }: HeaderProps) {
   return (
     <div
       style={{
@@ -49,10 +73,32 @@ export function Header({ completionDate, remainingMd, repoUrl, summary, showCrit
       </span>
       {completionDate ? (
         <>
-          <span>
-            完了予定: <strong>{completionDate}</strong>
-          </span>
-          <span style={{ opacity: 0.6 }}>残り {remainingMd}MD</span>
+          {estimateMode === "sp" && velocity <= 0 ? (
+            <>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                完了予定: <strong>-</strong>
+                <HelpBadge title="Sprint設定のVelocityを入力すると完了予定日が算出されます" />
+              </span>
+              <span style={{ fontSize: 12, opacity: 0.6 }}>残り {totalEstimate}SP</span>
+            </>
+          ) : estimateMode === "sp" ? (
+            <>
+              <span>
+                完了予定: <strong>{completionDate}</strong>
+              </span>
+              <span style={{ fontSize: 12, opacity: 0.6, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                残り {Math.ceil(totalEstimate / velocity)}スプリント
+                <HelpBadge title={`${totalEstimate}SP ÷ ${velocity}SP/Sprint = ${Math.ceil(totalEstimate / velocity)}スプリント`} />
+              </span>
+            </>
+          ) : (
+            <>
+              <span>
+                完了予定: <strong>{completionDate}</strong>
+              </span>
+              <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>
+            </>
+          )}
           {onCalendar && (
             <button onClick={onCalendar} style={headerBtnStyle}>稼働日設定</button>
           )}

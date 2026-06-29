@@ -27,10 +27,6 @@ interface InputPanelProps {
   quota?: QuotaInfo | null;
   estimateMode?: string;
   onEstimateModeChange?: (mode: string) => void;
-  velocity?: number;
-  sprintDays?: number;
-  onVelocityChange?: (v: number) => void;
-  onSprintDaysChange?: (d: number) => void;
 }
 
 export function InputPanel({
@@ -41,10 +37,6 @@ export function InputPanel({
   quota,
   estimateMode = "md",
   onEstimateModeChange,
-  velocity = 20,
-  sprintDays = 10,
-  onVelocityChange,
-  onSprintDaysChange,
 }: InputPanelProps) {
   const [repoUrl, setRepoUrl] = useState(defaultRepoUrl);
   const [prompt, setPrompt] = useState(defaultPrompt);
@@ -107,33 +99,6 @@ export function InputPanel({
               ストーリーポイント (SP)
             </label>
           </div>
-
-          {estimateMode === "sp" && onVelocityChange && onSprintDaysChange && (
-            <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 2 }}>ベロシティ (SP/スプリント)</div>
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={velocity}
-                  onChange={(e) => onVelocityChange(parseInt(e.target.value) || 1)}
-                  style={{ ...inputStyle, width: "100%" }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 2 }}>スプリント期間 (稼働日)</div>
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={sprintDays}
-                  onChange={(e) => onSprintDaysChange(parseInt(e.target.value) || 1)}
-                  style={{ ...inputStyle, width: "100%" }}
-                />
-              </div>
-            </div>
-          )}
         </div>
       )}
 

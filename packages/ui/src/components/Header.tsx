@@ -1,4 +1,35 @@
+import { useState } from "react";
 import type { QuotaInfo } from "../types";
+
+function SprintInputs({ velocity, sprintDays, onVelocityChange, onSprintDaysChange }: {
+  velocity: number; sprintDays: number;
+  onVelocityChange: (v: number) => void; onSprintDaysChange: (d: number) => void;
+}) {
+  const [vStr, setVStr] = useState(String(velocity));
+  const [dStr, setDStr] = useState(String(sprintDays));
+  const smallInput = {
+    width: 48, padding: "2px 4px", fontSize: 12, textAlign: "center" as const,
+    background: "var(--vscode-input-background, #3c3c3c)",
+    color: "var(--vscode-input-foreground, #ccc)",
+    border: "1px solid var(--vscode-input-border, #555)",
+    borderRadius: 3,
+  };
+  return (
+    <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, opacity: 0.7 }}>
+      Velocity
+      <input type="number" min="1" step="1" value={vStr}
+        onChange={(e) => setVStr(e.target.value)}
+        onBlur={() => { const v = parseInt(vStr) || 1; setVStr(String(v)); onVelocityChange(v); }}
+        style={smallInput} />
+      SP /
+      <input type="number" min="1" step="1" value={dStr}
+        onChange={(e) => setDStr(e.target.value)}
+        onBlur={() => { const d = parseInt(dStr) || 1; setDStr(String(d)); onSprintDaysChange(d); }}
+        style={smallInput} />
+      日
+    </span>
+  );
+}
 
 const headerBtnStyle = {
   padding: "4px 12px",
@@ -25,9 +56,14 @@ interface HeaderProps {
   onChat?: () => void;
   quota?: QuotaInfo | null;
   estimateUnit?: string;
+  estimateMode?: string;
+  velocity?: number;
+  sprintDays?: number;
+  onVelocityChange?: (v: number) => void;
+  onSprintDaysChange?: (d: number) => void;
 }
 
-export function Header({ completionDate, remaining, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota, estimateUnit = "MD" }: HeaderProps) {
+export function Header({ completionDate, remaining, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota, estimateUnit = "MD", estimateMode, velocity = 20, sprintDays = 10, onVelocityChange, onSprintDaysChange }: HeaderProps) {
   return (
     <div
       style={{
@@ -54,6 +90,14 @@ export function Header({ completionDate, remaining, repoUrl, summary, showCritic
             完了予定: <strong>{completionDate}</strong>
           </span>
           <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>
+          {estimateMode === "sp" && onVelocityChange && onSprintDaysChange && (
+            <SprintInputs
+              velocity={velocity}
+              sprintDays={sprintDays}
+              onVelocityChange={onVelocityChange}
+              onSprintDaysChange={onSprintDaysChange}
+            />
+          )}
           {onCalendar && (
             <button onClick={onCalendar} style={headerBtnStyle}>稼働日設定</button>
           )}

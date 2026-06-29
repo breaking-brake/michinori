@@ -243,6 +243,11 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
         onChat={hasDag ? () => { setChatOpen(!chatOpen); setSelectedNodeId(null); setCalendarOpen(false); } : undefined}
         quota={quota}
         estimateUnit={estimateUnit}
+        estimateMode={estimateMode}
+        velocity={velocity}
+        sprintDays={sprintDays}
+        onVelocityChange={setVelocity}
+        onSprintDaysChange={setSprintDays}
         onSave={() => adapter.save()}
         onLoad={() => adapter.load()}
         onReset={() => {
@@ -267,10 +272,6 @@ function DagAppInner({ adapter, dispatch, nodes: dagNodes, derived, loading, err
           quota={quota}
           estimateMode={estimateMode}
           onEstimateModeChange={onEstimateModeChange}
-          velocity={velocity}
-          sprintDays={sprintDays}
-          onVelocityChange={setVelocity}
-          onSprintDaysChange={setSprintDays}
         />
       )}
       <div style={{ flex: 1, position: "relative" }}>

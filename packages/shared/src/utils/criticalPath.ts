@@ -8,7 +8,7 @@ function getRemaining(node: DagNodeType, estimateMode: EstimateModeType = "md"):
     case "進行中":
       return node.estimate * 0.5;
     case "PR Open":
-      return 0;
+      return node.estimate * 0.3;
     case "未着手":
     default:
       return node.estimate;

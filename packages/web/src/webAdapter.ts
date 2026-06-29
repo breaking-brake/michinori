@@ -48,6 +48,7 @@ export function createWebAdapter(
   addUserChatMessage: (content: string) => void,
   getChatMessages: () => ChatMessage[],
   onQuotaUpdate: (quota: QuotaInfo) => void,
+  getEstimateMode: () => string,
 ): DagAdapter {
   async function callAnalyze(
     repoUrl: string,
@@ -61,7 +62,7 @@ export function createWebAdapter(
       const res = await fetch(`${endpoint}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ repoUrl, prompt, currentDag }),
+        body: JSON.stringify({ repoUrl, prompt, estimateMode: currentDag?.metadata?.estimateMode ?? getEstimateMode(), currentDag }),
       });
 
       const quota = parseQuotaHeaders(res);

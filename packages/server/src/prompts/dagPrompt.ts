@@ -18,7 +18,7 @@ const BASE_RULES = `RULES:
 
 function buildSystemPrompt(estimateMode: EstimateModeType): string {
   const estimateField = estimateMode === "sp"
-    ? `- estimate: story points (relative sizing). Use Fibonacci-like values (0.5, 1, 2, 3, 5, 8, 13)`
+    ? `- estimate: story points (relative sizing). Use Fibonacci values only: 1, 2, 3, 5, 8, 13`
     : `- estimate: realistic time estimate in man-days (1 MD = 8 hours). Use 0.1 MD increments (e.g. 0.5, 1.0, 2.5)`;
 
   const granularity = estimateMode === "sp"

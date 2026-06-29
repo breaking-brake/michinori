@@ -15,8 +15,8 @@ export default function App() {
 
   const getChatMessages = useCallback(() => state.chatMessages, [state.chatMessages]);
   const adapter = useMemo(
-    () => createWebAdapter(dispatch, addUserChatMessage, getChatMessages, setQuota),
-    [dispatch, addUserChatMessage, getChatMessages],
+    () => createWebAdapter(dispatch, addUserChatMessage, getChatMessages, setQuota, () => estimateMode),
+    [dispatch, addUserChatMessage, getChatMessages, estimateMode],
   );
 
   return (

@@ -7,7 +7,7 @@ export interface DagAdapter {
   applyProposal(proposal: DagProposalType): void;
   changeStatus(nodeId: string, status: string): void;
   changePosition(nodeId: string, x: number, y: number): void;
-  updateNode(nodeId: string, fields: { label?: string; status?: string; category?: string; description?: string; estimateMd?: number }): void;
+  updateNode(nodeId: string, fields: { label?: string; status?: string; category?: string; description?: string; estimate?: number }): void;
   addNode(position: { x: number; y: number }): void;
   deleteNode(nodeId: string): void;
   addEdge(sourceId: string, targetId: string): void;

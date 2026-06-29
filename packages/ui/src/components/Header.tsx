@@ -13,7 +13,7 @@ const headerBtnStyle = {
 
 interface HeaderProps {
   completionDate: string | null;
-  remainingMd: number;
+  remaining: number;
   repoUrl?: string;
   summary?: string;
   showCriticalPath?: boolean;
@@ -24,9 +24,10 @@ interface HeaderProps {
   onCalendar?: () => void;
   onChat?: () => void;
   quota?: QuotaInfo | null;
+  estimateUnit?: string;
 }
 
-export function Header({ completionDate, remainingMd, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota }: HeaderProps) {
+export function Header({ completionDate, remaining, repoUrl, summary, showCriticalPath, onToggleCriticalPath, onReset, onSave, onLoad, onCalendar, onChat, quota, estimateUnit = "MD" }: HeaderProps) {
   return (
     <div
       style={{
@@ -52,7 +53,7 @@ export function Header({ completionDate, remainingMd, repoUrl, summary, showCrit
           <span>
             完了予定: <strong>{completionDate}</strong>
           </span>
-          <span style={{ opacity: 0.6 }}>残り {remainingMd}MD</span>
+          <span style={{ opacity: 0.6 }}>残り {remaining}{estimateUnit}</span>
           {onCalendar && (
             <button onClick={onCalendar} style={headerBtnStyle}>稼働日設定</button>
           )}

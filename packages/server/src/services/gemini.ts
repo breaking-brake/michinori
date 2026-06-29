@@ -1,6 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { DagNode, CATEGORY_DEFINITIONS, STATUS_DEFINITIONS } from "@michinori/shared";
-import { SYSTEM_PROMPT } from "../prompts/dagPrompt.js";
+import type { EstimateModeType } from "@michinori/shared";
+import { buildSystemPrompt } from "../prompts/dagPrompt.js";
 import { logger } from "../utils/logger.js";
 
 const MODEL = "gemini-2.5-flash";
@@ -17,12 +18,12 @@ const responseSchema = {
           id: { type: Type.STRING },
           label: { type: Type.STRING },
           description: { type: Type.STRING },
-          estimateMd: { type: Type.NUMBER },
+          estimate: { type: Type.NUMBER },
           category: { type: Type.STRING, enum: CATEGORY_DEFINITIONS.map((c) => c.value) },
           status: { type: Type.STRING, enum: STATUS_DEFINITIONS.map((s) => s.value) },
           dependencies: { type: Type.ARRAY, items: { type: Type.STRING } },
         },
-        required: ["id", "label", "description", "estimateMd", "category", "status", "dependencies"],
+        required: ["id", "label", "description", "estimate", "category", "status", "dependencies"],
       },
     },
   },
@@ -37,17 +38,20 @@ export interface GenerateDagResult {
 
 export async function generateDag(
   userPrompt: string,
+  estimateMode: EstimateModeType = "md",
 ): Promise<GenerateDagResult> {
   const { env } = await import("../config/env.js");
   const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
-  logger.info("gemini:call", { model: MODEL, promptLength: userPrompt.length });
+  const systemInstruction = buildSystemPrompt(estimateMode);
+
+  logger.info("gemini:call", { model: MODEL, estimateMode, promptLength: userPrompt.length });
 
   const response = await ai.models.generateContent({
     model: MODEL,
     contents: userPrompt,
     config: {
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction,
       responseMimeType: "application/json",
       responseSchema,
       temperature: 0.7,

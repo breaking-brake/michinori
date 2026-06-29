@@ -7,6 +7,7 @@ import { getEndpoint } from "./webAdapter";
 export default function App() {
   const { state, dispatch, addUserChatMessage, dismissProposal, markProposalApplied } = useDagMessages();
   const [quota, setQuota] = useState<QuotaInfo | null>(null);
+  const [estimateMode, setEstimateMode] = useState<string>("md");
 
   useEffect(() => {
     fetchQuota(getEndpoint()).then((q) => { if (q) setQuota(q); });
@@ -39,6 +40,8 @@ export default function App() {
       onDismissProposal={dismissProposal}
       onMarkProposalApplied={markProposalApplied}
       quota={quota}
+      estimateMode={estimateMode}
+      onEstimateModeChange={setEstimateMode}
     />
   );
 }

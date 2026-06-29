@@ -87,7 +87,7 @@ function PreviewCanvas({ currentNodes, proposal, calendarConfig }: Pick<Proposal
       position: n.position ?? positions.get(n.id) ?? { x: 0, y: 0 },
       data: {
         label: n.label,
-        estimateMd: n.estimateMd,
+        estimate: n.estimate,
         category: n.category,
         status: n.status,
         description: n.description,
@@ -174,7 +174,7 @@ function PreviewCanvas({ currentNodes, proposal, calendarConfig }: Pick<Proposal
             status={selectedNode.status}
             category={selectedNode.category}
             description={selectedNode.description}
-            estimateMd={selectedNode.estimateMd}
+            estimate={selectedNode.estimate}
             onUpdate={() => setSelectedNodeId(null)}
             onClose={() => setSelectedNodeId(null)}
             readOnly

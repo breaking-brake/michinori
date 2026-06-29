@@ -7,11 +7,12 @@ const CATEGORY_COLORS = Object.fromEntries(CATEGORY_DEFINITIONS.map((c) => [c.va
 
 interface DagNodeData {
   label: string;
-  estimateMd: number;
+  estimate: number;
   category: string;
   status: string;
   description: string;
   onCriticalPath?: boolean;
+  estimateUnit?: string;
   onDelete?: (nodeId: string) => void;
   [key: string]: unknown;
 }
@@ -95,7 +96,7 @@ export const DagNode = memo(({ id, data, selected }: NodeProps) => {
         >
           {d.status}
         </span>
-        <span style={{ fontSize: 11, opacity: 0.7 }}>{d.estimateMd}MD</span>
+        <span style={{ fontSize: 11, opacity: 0.7 }}>{d.estimate}{d.estimateUnit ?? "MD"}</span>
       </div>
       <Handle type="source" position={Position.Bottom} />
     </div>

@@ -24,11 +24,14 @@ export type NodeStatus = z.infer<typeof NodeStatus>;
 export const NodeCategory = z.enum(categoryValues);
 export type NodeCategory = z.infer<typeof NodeCategory>;
 
+export const EstimateMode = z.enum(["md", "sp"]);
+export type EstimateMode = z.infer<typeof EstimateMode>;
+
 export const DagNode = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
   description: z.string(),
-  estimateMd: z.number().positive(),
+  estimate: z.number().positive(),
   category: NodeCategory.default("実装"),
   status: NodeStatus.default("未着手"),
   dependencies: z.array(z.string()).default([]),
@@ -44,8 +47,8 @@ export type DagNode = z.infer<typeof DagNode>;
 export const DagDerived = z.object({
   criticalPath: z.array(z.string()),
   estimatedCompletionDate: z.string(),
-  totalEstimateMd: z.number(),
-  remainingMd: z.number(),
+  totalEstimate: z.number(),
+  remaining: z.number(),
 });
 export type DagDerived = z.infer<typeof DagDerived>;
 
@@ -59,12 +62,19 @@ export const CalendarConfig = z.object({
 });
 export type CalendarConfig = z.infer<typeof CalendarConfig>;
 
+export const SprintConfig = z.object({
+  velocity: z.number().positive(),
+  sprintDays: z.number().positive().default(10),
+});
+export type SprintConfig = z.infer<typeof SprintConfig>;
+
 export const MichinoriFile = z.object({
   version: z.literal(1),
   metadata: z.object({
     repoUrl: z.string().url(),
     prompt: z.string(),
     summary: z.string().default(""),
+    estimateMode: EstimateMode.default("md"),
     generatedAt: z.string().datetime(),
     updatedAt: z.string().datetime(),
     model: z.string().default("gemini-2.5-flash"),
@@ -72,5 +82,6 @@ export const MichinoriFile = z.object({
   nodes: z.array(DagNode).min(1),
   derived: DagDerived,
   calendar: CalendarConfig.default({}),
+  sprint: SprintConfig.optional(),
 });
 export type MichinoriFile = z.infer<typeof MichinoriFile>;

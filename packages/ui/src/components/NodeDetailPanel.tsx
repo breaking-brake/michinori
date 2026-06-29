@@ -39,26 +39,27 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
   const [editStatus, setEditStatus] = useState(status);
   const [editCategory, setEditCategory] = useState(category);
   const [editDescription, setEditDescription] = useState(description);
-  const [editEstimateStr, setEditEstimateMdStr] = useState(String(estimate));
+  const [editEstimateStr, setEditEstimateStr] = useState(String(estimate));
 
   useEffect(() => {
     setEditLabel(label);
     setEditStatus(status);
     setEditCategory(category);
     setEditDescription(description);
-    setEditEstimateMdStr(String(estimate));
+    setEditEstimateStr(String(estimate));
   }, [nodeId, label, status, category, description, estimate]);
 
   const handleSave = () => {
-    const parsedVal = Math.round(parseFloat(editEstimateStr || "0") * 10) / 10;
-    const finalVal = parsedVal > 0 ? parsedVal : 0.1;
+    const finalVal = estimateUnit === "SP"
+      ? (parseInt(editEstimateStr) || 1)
+      : (Math.round(parseFloat(editEstimateStr || "0") * 10) / 10 || 0.1);
     const fields: { label?: string; status?: string; category?: string; description?: string; estimate?: number } = {};
     if (editLabel !== label) fields.label = editLabel;
     if (editStatus !== status) fields.status = editStatus;
     if (editCategory !== category) fields.category = editCategory;
     if (editDescription !== description) fields.description = editDescription;
     if (finalVal !== estimate) fields.estimate = finalVal;
-    setEditEstimateMdStr(String(finalVal));
+    setEditEstimateStr(String(finalVal));
     if (Object.keys(fields).length > 0) {
       onUpdate(fields);
     }
@@ -172,19 +173,32 @@ export function NodeDetailPanel({ nodeId, label, status, category, description, 
 
         <div>
           <div style={labelStyle}>{estimateUnit === "SP" ? "ストーリーポイント" : "工数 (MD)"}</div>
-          <input
-            type="number"
-            min="0.1"
-            step="0.1"
-            value={editEstimateStr}
-            onChange={(e) => setEditEstimateMdStr(e.target.value)}
-            onBlur={() => {
-              const parsed = Math.round(parseFloat(editEstimateStr || "0") * 10) / 10;
-              setEditEstimateMdStr(String(parsed > 0 ? parsed : 0.1));
-            }}
-            disabled={readOnly}
-            style={inputStyle}
-          />
+          {estimateUnit === "SP" ? (
+            <select
+              value={editEstimateStr}
+              onChange={(e) => setEditEstimateStr(e.target.value)}
+              disabled={readOnly}
+              style={{ ...inputStyle, cursor: readOnly ? "default" : "pointer" }}
+            >
+              {[1, 2, 3, 5, 8, 13].map((sp) => (
+                <option key={sp} value={String(sp)}>{sp}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="number"
+              min="0.1"
+              step="0.1"
+              value={editEstimateStr}
+              onChange={(e) => setEditEstimateStr(e.target.value)}
+              onBlur={() => {
+                const parsed = Math.round(parseFloat(editEstimateStr || "0") * 10) / 10;
+                setEditEstimateStr(String(parsed > 0 ? parsed : 0.1));
+              }}
+              disabled={readOnly}
+              style={inputStyle}
+            />
+          )}
         </div>
 
         {!readOnly && (

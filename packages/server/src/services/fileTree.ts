@@ -95,6 +95,10 @@ export async function collectFiles(repoDir: string): Promise<FileEntry[]> {
     const entries = await readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.name.startsWith(".") && entry.name !== ".github") continue;
+      // Skip symlinks: a malicious repo could symlink to files outside the
+      // clone (e.g. /etc/passwd, mounted secrets) and stat()/readFile() would
+      // follow the link, leaking server-side files into the prompt/cache.
+      if (entry.isSymbolicLink()) continue;
       const fullPath = join(dir, entry.name);
 
       if (entry.isDirectory()) {

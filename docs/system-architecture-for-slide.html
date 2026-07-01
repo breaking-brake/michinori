@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michinori: System Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0d1a;
+    font-family: 'Noto Sans JP', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .slide {
+    width: 1200px;
+    min-height: 680px;
+    background: #161625;
+    border-radius: 16px;
+    padding: 36px 44px 32px;
+    position: relative;
+  }
+  .title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .tagline {
+    text-align: center;
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 32px;
+  }
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .col { flex: 1; }
+  .col-wide { flex: 1.6; }
+  .connector {
+    width: 56px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .connector-arrow {
+    width: 100%;
+    height: 2px;
+    position: relative;
+  }
+  .connector-arrow-blue { background: #3b82f6; }
+  .connector-arrow-green { background: #10b981; }
+  .connector-arrow-blue::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -5px;
+    border: 6px solid transparent;
+    border-left-color: #3b82f6;
+  }
+  .connector-arrow-green::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -5px;
+    border: 6px solid transparent;
+    border-left-color: #10b981;
+  }
+  .connector-label {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .connector-label-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .connector-label-green { background: rgba(16,185,129,0.15); color: #34d399; }
+  .card {
+    border-radius: 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px;
+    position: relative;
+  }
+  .card-github {
+    background: rgba(59,130,246,0.06);
+    border: 1px solid rgba(59,130,246,0.3);
+  }
+  .card-harness {
+    background: rgba(124,58,237,0.06);
+    border: 1px solid rgba(124,58,237,0.3);
+  }
+  .card-dag {
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+  .card-icon {
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 32px;
+    line-height: 1;
+  }
+  .card-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .card-subtitle {
+    text-align: center;
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 16px;
+  }
+  .step-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 8px 14px;
+    text-align: center;
+    font-size: 13px;
+    color: #d1d5db;
+  }
+  .step-box-mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+  .step-arrow {
+    text-align: center;
+    color: #3b82f6;
+    font-size: 16px;
+    padding: 4px 0;
+  }
+  .card-harness .step-arrow { color: #a78bfa; }
+  .endpoint {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .endpoint-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .endpoint-desc {
+    font-size: 12px;
+    color: #9ca3af;
+    line-height: 1.5;
+  }
+  .tools-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 8px;
+  }
+  .tools-label {
+    font-size: 11px;
+    color: #6b7280;
+  }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .tool-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #e9d5ff;
+    padding: 5px 10px;
+    background: rgba(124,58,237,0.2);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 6px;
+    text-align: center;
+  }
+  .approval {
+    text-align: center;
+    font-size: 11px;
+    color: #fbbf24;
+    margin-top: 10px;
+  }
+  .dag-mini {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .dag-node-small {
+    width: 56px;
+    height: 26px;
+    border-radius: 5px;
+    background: rgba(16,185,129,0.2);
+    border: 1px solid rgba(16,185,129,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dag-node-bottom {
+    width: 56px;
+    height: 26px;
+    border-radius: 5px;
+    background: rgba(16,185,129,0.2);
+    border: 1px solid rgba(16,185,129,0.4);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dag-node-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #34d399;
+  }
+  .dag-edges {
+    text-align: center;
+    color: #34d399;
+    font-size: 14px;
+    padding: 2px 0;
+  }
+  .output-list {
+    list-style: none;
+    margin-top: 10px;
+  }
+  .output-list li {
+    font-size: 13px;
+    color: #d1d5db;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-green { background: #10b981; }
+  .dot-red { background: #ef4444; }
+  .output-list li.critical { color: #fca5a5; }
+  .file-badge {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #1a1a1a;
+    background: rgba(16,185,129,0.25);
+    border: 1px solid rgba(16,185,129,0.4);
+    border-radius: 6px;
+    padding: 4px 12px;
+    display: inline-block;
+    margin-top: 12px;
+  }
+  .footer {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .footer-item {
+    font-size: 11px;
+    color: #4b5563;
+  }
+  .card-icon img {
+    width: 36px;
+    height: 36px;
+  }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="title">Michinori: 作業計画アシスタント</div>
+  <div class="tagline">コードベースから、作業の全体像・依存関係・完了見込みを一気に可視化</div>
+
+  <div class="flow">
+    <div class="col">
+      <div class="card card-github">
+        <div class="card-icon">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/github.svg" alt="GitHub" style="filter: brightness(0) invert(0.7);">
+        </div>
+        <div class="card-title">GitHub Public Repo</div>
+        <div class="card-subtitle">&nbsp;</div>
+        <div class="step-box step-box-mono">Gitレポジトリ取得</div>
+        <div class="step-arrow">↓</div>
+        <div class="step-box">コード解析</div>
+        <div class="step-arrow">↓</div>
+        <div class="step-box">チャンク化 (情報圧縮)</div>
+      </div>
+    </div>
+
+    <div class="connector">
+      <div class="connector-label connector-label-blue">コードコンテキスト</div>
+      <div class="connector-arrow connector-arrow-blue"></div>
+    </div>
+
+    <div class="col col-wide">
+      <div class="card card-harness">
+        <div class="card-icon">
+          <img src="https://unpkg.com/lucide-static@latest/icons/sparkles.svg" alt="AI" style="filter: brightness(0) saturate(100%) invert(68%) sepia(63%) saturate(2575%) hue-rotate(226deg) brightness(101%) contrast(96%);">
+        </div>
+        <div class="card-title">AI Agent Harness</div>
+        <div class="card-subtitle">Gemini 2.5 Flash</div>
+
+        <div class="endpoint" style="margin-bottom: 10px;">
+          <div class="endpoint-name">/analyze</div>
+          <div class="endpoint-desc">初回DAG生成<br>構造化JSON出力</div>
+        </div>
+
+        <div class="step-arrow">↓</div>
+
+        <div class="endpoint">
+          <div class="endpoint-name">/chat</div>
+          <div class="endpoint-desc">対話的修正 (Function Calling)</div>
+          <div class="tool-list">
+            <div class="tools-label">Tools</div>
+            <div class="tools-grid">
+              <div class="tool-chip">list_files</div>
+              <div class="tool-chip">read_file</div>
+              <div class="tool-chip">search_code</div>
+              <div class="tool-chip">propose_dag</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="step-box">👤 ユーザー承認</div>
+      </div>
+    </div>
+
+    <div class="connector">
+      <div class="connector-label connector-label-green">構造化JSON</div>
+      <div class="connector-arrow connector-arrow-green"></div>
+    </div>
+
+    <div class="col">
+      <div class="card card-dag">
+        <div class="card-icon">
+          <img src="https://unpkg.com/lucide-static@latest/icons/git-branch.svg" alt="DAG" style="filter: brightness(0) saturate(100%) invert(72%) sepia(32%) saturate(1057%) hue-rotate(108deg) brightness(93%) contrast(89%);">
+        </div>
+        <div class="card-title">DAG 作業計画</div>
+        <div class="card-subtitle">&nbsp;</div>
+        <div class="dag-mini">
+          <div class="dag-node-small"><span class="dag-node-label">Task A</span></div>
+          <div class="dag-node-small"><span class="dag-node-label">Task B</span></div>
+        </div>
+        <div class="dag-edges">↘ &nbsp;&nbsp;&nbsp; ↙</div>
+        <div class="dag-node-bottom"><span class="dag-node-label">Task C</span></div>
+        <ul class="output-list">
+          <li><span class="dot dot-green"></span>ノード (タスク)</li>
+          <li><span class="dot dot-green"></span>依存関係 (エッジ)</li>
+          <li><span class="dot dot-green"></span>工数 (MD)</li>
+          <li class="critical"><span class="dot dot-red"></span>クリティカルパス</li>
+          <li><span class="dot dot-green"></span>完了予定日</li>
+          <li><span class="dot dot-green"></span>カテゴリ / ステータス</li>
+        </ul>
+        <div style="text-align:center;"><span class="file-badge">.michinori.json</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

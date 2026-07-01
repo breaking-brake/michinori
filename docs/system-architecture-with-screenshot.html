@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michinori: System Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0d1a;
+    font-family: 'Noto Sans JP', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .slide {
+    width: 1400px;
+    min-height: 680px;
+    background: #161625;
+    border-radius: 16px;
+    padding: 36px 44px 32px;
+    position: relative;
+  }
+  .title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .tagline {
+    text-align: center;
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 32px;
+  }
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .col-input { flex: 0.7; }
+  .col-harness { flex: 0.8; }
+  .col-output { flex: 1.8; }
+  .connector {
+    width: 40px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .connector-arrow {
+    width: 100%;
+    height: 2px;
+    position: relative;
+  }
+  .connector-arrow-blue { background: #3b82f6; }
+  .connector-arrow-green { background: #10b981; }
+  .connector-arrow-blue::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -5px;
+    border: 6px solid transparent;
+    border-left-color: #3b82f6;
+  }
+  .connector-arrow-green::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -5px;
+    border: 6px solid transparent;
+    border-left-color: #10b981;
+  }
+  .connector-label {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .connector-label-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .connector-label-green { background: rgba(16,185,129,0.15); color: #34d399; }
+  .card {
+    border-radius: 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    position: relative;
+  }
+  .card-github {
+    background: rgba(59,130,246,0.06);
+    border: 1px solid rgba(59,130,246,0.3);
+  }
+  .card-harness {
+    background: rgba(124,58,237,0.06);
+    border: 1px solid rgba(124,58,237,0.3);
+  }
+  .card-output {
+    background: rgba(16,185,129,0.04);
+    border: 1px solid rgba(16,185,129,0.25);
+    padding: 0;
+    overflow: hidden;
+  }
+  .card-icon {
+    text-align: center;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .card-icon img {
+    width: 30px;
+    height: 30px;
+  }
+  .icon-github { filter: brightness(0) invert(0.7); }
+  .icon-harness { filter: brightness(0) saturate(100%) invert(68%) sepia(63%) saturate(2575%) hue-rotate(226deg) brightness(101%) contrast(96%); }
+  .card-title {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 3px;
+  }
+  .card-subtitle {
+    text-align: center;
+    font-size: 10px;
+    color: #6b7280;
+    margin-bottom: 12px;
+  }
+  .step-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 6px 10px;
+    text-align: center;
+    font-size: 11px;
+    color: #d1d5db;
+  }
+  .step-arrow {
+    text-align: center;
+    color: #3b82f6;
+    font-size: 14px;
+    padding: 3px 0;
+  }
+  .card-harness .step-arrow { color: #a78bfa; }
+  .endpoint {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .endpoint-mb { margin-bottom: 6px; }
+  .endpoint-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+  .endpoint-desc {
+    font-size: 10px;
+    color: #9ca3af;
+    line-height: 1.4;
+  }
+  .tools-label {
+    font-size: 9px;
+    color: #6b7280;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+  .tool-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #e9d5ff;
+    padding: 3px 6px;
+    background: rgba(124,58,237,0.2);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 4px;
+    text-align: center;
+  }
+  .output-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(16,185,129,0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .output-header-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .output-header-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: #34d399;
+    background: rgba(16,185,129,0.15);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .screenshot-wrap {
+    width: 100%;
+    height: 100%;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .screenshot-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+  }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="title">Michinori: 作業計画アシスタント</div>
+  <div class="tagline">コードベースから、作業の全体像・依存関係・完了見込みを一気に可視化</div>
+
+  <div class="flow">
+    <div class="col-input">
+      <div class="card card-github">
+        <div class="card-icon">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/github.svg" alt="GitHub" class="icon-github">
+        </div>
+        <div class="card-title">GitHub Public Repo</div>
+        <div class="card-subtitle">&nbsp;</div>
+        <div class="step-box">Gitレポジトリ取得</div>
+        <div class="step-arrow">↓</div>
+        <div class="step-box">コード解析</div>
+        <div class="step-arrow">↓</div>
+        <div class="step-box">チャンク化 (情報圧縮)</div>
+      </div>
+    </div>
+
+    <div class="connector">
+      <div class="connector-label connector-label-blue">コード</div>
+      <div class="connector-arrow connector-arrow-blue"></div>
+    </div>
+
+    <div class="col-harness">
+      <div class="card card-harness">
+        <div class="card-icon">
+          <img src="https://unpkg.com/lucide-static@latest/icons/sparkles.svg" alt="AI" class="icon-harness">
+        </div>
+        <div class="card-title">AI Agent Harness</div>
+        <div class="card-subtitle">Gemini 2.5 Flash</div>
+
+        <div class="endpoint endpoint-mb">
+          <div class="endpoint-name">/analyze</div>
+          <div class="endpoint-desc">初回DAG生成<br>構造化JSON出力</div>
+        </div>
+
+        <div class="step-arrow">↓</div>
+
+        <div class="endpoint">
+          <div class="endpoint-name">/chat</div>
+          <div class="endpoint-desc">対話的修正 (Function Calling)</div>
+          <div class="tools-label">Tools</div>
+          <div class="tools-grid">
+            <div class="tool-chip">list_files</div>
+            <div class="tool-chip">read_file</div>
+            <div class="tool-chip">search_code</div>
+            <div class="tool-chip">propose_dag</div>
+          </div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="step-box">👤 ユーザー承認</div>
+      </div>
+    </div>
+
+    <div class="connector">
+      <div class="connector-label connector-label-green">JSON</div>
+      <div class="connector-arrow connector-arrow-green"></div>
+    </div>
+
+    <div class="col-output">
+      <div class="card card-output">
+        <div class="output-header">
+          <div class="output-header-title">DAG 作業計画</div>
+        </div>
+        <div class="screenshot-wrap">
+          <img src="screenshot.png" alt="Michinori DAG Canvas">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
